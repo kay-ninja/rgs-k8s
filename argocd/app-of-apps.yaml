@@ -1,0 +1,284 @@
+# ArgoCD App of Apps - RGS Platform
+# This is the main application that manages all other applications
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: rgs-platform
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL:  https://github.com/kay-ninja/rgs-k8s
+    targetRevision: HEAD
+    path: argocd/apps
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+      allowEmpty: false
+    syncOptions:
+      - CreateNamespace=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m
+---
+# Infrastructure Applications
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: infrastructure-apps
+  namespace: argocd
+spec:
+  generators:
+  - list:
+      elements:
+      - name: postgresql
+        namespace: rgs-infrastructure
+      - name: redis
+        namespace: rgs-infrastructure
+      - name: rabbitmq
+        namespace: rgs-infrastructure
+      - name: mysql
+        namespace: rgs-infrastructure
+  template:
+    metadata:
+      name: '{{name}}'
+      namespace: argocd
+    spec:
+      project: infrastructure
+      source:
+        repoURL:  https://github.com/kay-ninja/rgs-k8s
+        targetRevision: HEAD
+        path: 'helm-charts/infrastructure/{{name}}'
+        helm:
+          valueFiles:
+          - values.yaml
+          - values-production.yaml
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: '{{namespace}}'
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+        - CreateNamespace=true
+---
+# Core Services Applications
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: core-services-apps
+  namespace: argocd
+spec:
+  generators:
+  - list:
+      elements:
+      - name: office
+        namespace: rgs-core
+        replicas: 3
+      - name: exchange
+        namespace: rgs-core
+        replicas: 3
+      - name: history
+        namespace: rgs-core
+        replicas: 3
+      - name: launch
+        namespace: rgs-core
+        replicas: 3
+      - name: overlord
+        namespace: rgs-core
+        replicas: 3
+      - name: pfr
+        namespace: rgs-core
+        replicas: 3
+      - name: rng
+        namespace: rgs-core
+        replicas: 3
+      - name: adaptor
+        namespace: rgs-core
+        replicas: 2
+  template:
+    metadata:
+      name: '{{name}}-service'
+      namespace: argocd
+      labels:
+        app: '{{name}}'
+        type: core-service
+    spec:
+      project: core-services
+      source:
+        repoURL:  https://github.com/kay-ninja/rgs-k8s
+        targetRevision: HEAD
+        path: 'helm-charts/core-services/{{name}}'
+        helm:
+          parameters:
+          - name: replicaCount
+            value: '{{replicas}}'
+          valueFiles:
+          - values.yaml
+          - values-production.yaml
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: '{{namespace}}'
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+        - CreateNamespace=true
+        retry:
+          limit: 3
+          backoff:
+            duration: 30s
+            factor: 2
+            maxDuration: 3m
+---
+# Game Services Application Set
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: game-services-apps
+  namespace: argocd
+spec:
+  generators:
+  - git:
+      repoURL:  https://github.com/kay-ninja/rgs-k8s
+      revision: HEAD
+      directories:
+      - path: helm-charts/game-services/*
+  template:
+    metadata:
+      name: '{{path.basename}}-game'
+      namespace: argocd
+      labels:
+        app: '{{path.basename}}'
+        type: game-service
+    spec:
+      project: games
+      source:
+        repoURL:  https://github.com/kay-ninja/rgs-k8s
+        targetRevision: HEAD
+        path: '{{path}}'
+        helm:
+          valueFiles:
+          - values.yaml
+          - values-production.yaml
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: rgs-games
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+        - CreateNamespace=true
+---
+# Istio Configuration Application
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: istio-config
+  namespace: argocd
+spec:
+  project: networking
+  source:
+    repoURL:  https://github.com/kay-ninja/rgs-k8s
+    targetRevision: HEAD
+    path: istio
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: istio-system
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+    - CreateNamespace=false
+---
+# ArgoCD Projects
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: infrastructure
+  namespace: argocd
+spec:
+  description: Infrastructure components
+  sourceRepos:
+  - ' https://github.com/kay-ninja/rgs-k8s'
+  destinations:
+  - namespace: 'rgs-infrastructure'
+    server: https://kubernetes.default.svc
+  clusterResourceWhitelist:
+  - group: '*'
+    kind: '*'
+  namespaceResourceWhitelist:
+  - group: '*'
+    kind: '*'
+---
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: core-services
+  namespace: argocd
+spec:
+  description: Core RGS services
+  sourceRepos:
+  - ' https://github.com/kay-ninja/rgs-k8s'
+  destinations:
+  - namespace: 'rgs-core'
+    server: https://kubernetes.default.svc
+  clusterResourceWhitelist:
+  - group: '*'
+    kind: '*'
+  namespaceResourceWhitelist:
+  - group: '*'
+    kind: '*'
+---
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: games
+  namespace: argocd
+spec:
+  description: Game services
+  sourceRepos:
+  - ' https://github.com/kay-ninja/rgs-k8s'
+  destinations:
+  - namespace: 'rgs-games'
+    server: https://kubernetes.default.svc
+  clusterResourceWhitelist:
+  - group: '*'
+    kind: '*'
+  namespaceResourceWhitelist:
+  - group: '*'
+    kind: '*'
+---
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: networking
+  namespace: argocd
+spec:
+  description: Networking and traffic management
+  sourceRepos:
+  - ' https://github.com/kay-ninja/rgs-k8s'
+  destinations:
+  - namespace: 'istio-system'
+    server: https://kubernetes.default.svc
+  - namespace: 'rgs-*'
+    server: https://kubernetes.default.svc
+  clusterResourceWhitelist:
+  - group: '*'
+    kind: '*'
+  namespaceResourceWhitelist:
+  - group: '*'
+    kind: '*'

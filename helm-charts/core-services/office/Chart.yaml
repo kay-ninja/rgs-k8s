@@ -1,0 +1,13 @@
+# Helm Chart for RGS Core Services
+# Path: helm-charts/core-services/office/Chart.yaml
+apiVersion: v2
+name: office
+description: RGS Office/Backoffice Service
+type: application
+version: 1.0.0
+appVersion: "2.5.54"
+
+dependencies:
+  - name: common
+    version: 1.0.0
+    repository: "file://../common"
