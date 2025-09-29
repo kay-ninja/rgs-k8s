@@ -1,12 +1,12 @@
 apiVersion: v2
-name: office
-description: RGS Office/Backoffice Service
+name: rng
+description: RGS Random number generation service
 type: application
 version: 1.0.0
-appVersion: "2.5.54"
+appVersion: "1.0.19"
 keywords:
   - rgs
-  - backoffice
+  - rng
   - core-service
 home:  https://github.com/kay-ninja/rgs-k8s
 maintainers:

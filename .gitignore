@@ -1,0 +1,29 @@
+# macOS
+.DS_Store
+
+# Helm build artifacts
+charts/
+Chart.lock
+*.tgz
+
+# Temporary files
+*.swp
+*.bak
+*.tmp
+*.orig
+
+# IDE / Editor files
+.vscode/
+.idea/
+*.iml
+
+# Logs
+*.log
+
+# Package manager caches
+node_modules/
+dist/
+
+# Misc
+Thumbs.db
+

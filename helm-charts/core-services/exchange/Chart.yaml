@@ -1,12 +1,13 @@
 apiVersion: v2
-name: office
-description: RGS Office/Backoffice Service
+name: exchange
+description: RGS Exchange Service - Currency and wallet management
 type: application
 version: 1.0.0
-appVersion: "2.5.54"
+appVersion: "1.0.52"
 keywords:
   - rgs
-  - backoffice
+  - exchange
+  - wallet
   - core-service
 home:  https://github.com/kay-ninja/rgs-k8s
 maintainers:

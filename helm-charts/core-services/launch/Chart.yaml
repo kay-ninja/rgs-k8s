@@ -1,12 +1,12 @@
 apiVersion: v2
-name: office
-description: RGS Office/Backoffice Service
+name: launch
+description: RGS Game launcher service
 type: application
 version: 1.0.0
-appVersion: "2.5.54"
+appVersion: "1.0.37"
 keywords:
   - rgs
-  - backoffice
+  - launch
   - core-service
 home:  https://github.com/kay-ninja/rgs-k8s
 maintainers:

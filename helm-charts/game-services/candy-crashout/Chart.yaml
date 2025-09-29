@@ -1,0 +1,6 @@
+apiVersion: v2
+name: candy-crashout
+description: Game service for candy-crashout
+type: application
+version: 1.0.0
+appVersion: "1.0.0"

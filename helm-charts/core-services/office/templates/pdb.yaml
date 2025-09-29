@@ -1,0 +1,15 @@
+{{- if .Values.podDisruptionBudget.enabled }}
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "office.fullname" . }}-server
+  labels:
+    {{- include "office.labels" . | nindent 4 }}
+    component: server
+spec:
+  minAvailable: {{ .Values.podDisruptionBudget.minAvailable }}
+  selector:
+    matchLabels:
+      {{- include "office.selectorLabels" . | nindent 6 }}
+      component: server
+{{- end }}

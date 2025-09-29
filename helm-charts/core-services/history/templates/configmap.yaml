@@ -1,0 +1,37 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "history.fullname" . }}-config
+  labels:
+    {{- include "history.labels" . | nindent 4 }}
+data:
+  NODE_ENV: {{ .Values.config.env | quote }}
+  LOG_LEVEL: {{ .Values.config.logLevel | quote }}
+  
+  # Server configuration
+  SERVER_HOST: {{ .Values.config.server.host | quote }}
+  SERVER_PORT: {{ .Values.config.server.port | quote }}
+  SERVER_READ_TIMEOUT: {{ .Values.config.server.readTimeout | quote }}
+  SERVER_WRITE_TIMEOUT: {{ .Values.config.server.writeTimeout | quote }}
+  
+  # RPC configuration
+  RPC_HOST: {{ .Values.config.rpc.host | quote }}
+  RPC_PORT: {{ .Values.config.rpc.port | quote }}
+  RPC_MAX_PROCESSING_TIME: {{ .Values.config.rpc.maxProcessingTime | quote }}
+  
+  # Database configuration
+  DB_HOST: {{ .Values.database.host | quote }}
+  DB_PORT: {{ .Values.database.port | quote }}
+  DB_NAME: {{ .Values.database.name | quote }}
+  DB_CONNECTION_TIMEOUT: {{ .Values.database.connectionTimeout | quote }}
+  DB_MIN_CONNECTIONS: {{ .Values.database.minConnections | quote }}
+  DB_MAX_CONNECTIONS: {{ .Values.database.maxConnections | quote }}
+  
+  # Redis configuration
+  REDIS_HOST: {{ .Values.redis.host | quote }}
+  REDIS_PORT: {{ .Values.redis.port | quote }}
+  REDIS_BASE_PREFIX: {{ .Values.redis.basePrefix | quote }}
+  
+  # RabbitMQ configuration
+  RABBITMQ_HOST: {{ .Values.rabbitmq.host | quote }}
+  RABBITMQ_PORT: {{ .Values.rabbitmq.port | quote }}

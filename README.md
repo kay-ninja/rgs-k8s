@@ -127,7 +127,7 @@ kubeseal --version
 
 ### 1. Clone Repository
 ```bash
-git clone https://github.com/your-org/rgs-k8s.git
+git clone  https://github.com/kay-ninja/rgs-k8s.git
 cd rgs-k8s
 ```
 

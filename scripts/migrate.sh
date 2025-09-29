@@ -14,7 +14,7 @@ NC='\033[0m' # No Color
 NAMESPACE_INFRA="rgs-infrastructure"
 NAMESPACE_CORE="rgs-core"
 NAMESPACE_GAMES="rgs-games"
-GITHUB_REPO="https://github.com/your-org/rgs-k8s.git"
+GITHUB_REPO=" https://github.com/kay-ninja/rgs-k8s.git"
 DOCKER_REGISTRY="rg.fr-par.scw.cloud/ejaw"
 
 # Functions

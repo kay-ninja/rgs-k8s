@@ -1,12 +1,12 @@
 apiVersion: v2
-name: office
-description: RGS Office/Backoffice Service
+name: overlord
+description: RGS Master control and orchestration service
 type: application
 version: 1.0.0
-appVersion: "2.5.54"
+appVersion: "1.0.23"
 keywords:
   - rgs
-  - backoffice
+  - overlord
   - core-service
 home:  https://github.com/kay-ninja/rgs-k8s
 maintainers:

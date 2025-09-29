@@ -17,14 +17,14 @@ spec:
     - "rgs.yourdomain.com"
     # Redirect to HTTPS
     tls:
-      httpsRedirect: true
+      httpsRedirect: false
   - port:
       number: 443
       name: https
       protocol: HTTPS
     hosts:
     - "dev-h3-games.ninjagaming.com"  #"*.rgs.yourdomain.com"
-    - "dev-h3-games.ninjagaming.com" #"rgs.yourdomain.com"
+    - "dev-h3-backoffice.ninjagaming.com" #"rgs.yourdomain.com"
     tls:
       mode: SIMPLE
       credentialName: rgs-tls-cert # Created via cert-manager
