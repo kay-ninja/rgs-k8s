@@ -91,6 +91,9 @@ affinity:
             - office
         topologyKey: kubernetes.io/hostname
 
+# Enable secrets creation
+secretsEnabled: true
+
 # Application Configuration
 config:
   env: production
@@ -101,7 +104,7 @@ config:
   
   client:
     logoUrl: https://s3.fr-par.scw.cloud/heronbyte.cdn/backoffice-logo/ninjagaming-logo.png
-    environmentName: "RGS Production"
+    environmentName: "Ninjagaming RGS Production"
   
   server:
     host: "0.0.0.0"
@@ -114,43 +117,85 @@ config:
     port: 7400
     maxProcessingTime: 300000
   
-  # Service dependencies
+  # Service dependencies - Updated to use Kubernetes service discovery
   history:
-    host: history.rgs-core.svc.cluster.local
-    port: 7210
+    host: history-service-server.rgs-core.svc.cluster.local
+    port: 7200
     isSecure: false
   
   overlord:
-    host: overlord.rgs-core.svc.cluster.local
-    port: 7510
+    host: overlord-service-server.rgs-core.svc.cluster.local
+    port: 7500
     isSecure: false
   
   exchange:
-    host: exchange.rgs-core.svc.cluster.local
-    port: 7110
+    host: exchange-service-server.rgs-core.svc.cluster.local
+    port: 7100
     isSecure: false
 
 # Database configuration
 database:
-  host: postgresql.rgs-infrastructure.svc.cluster.local
+  host: 77.93.172.81  # External database - keep as is for now
   port: 5432
   name: office
+  user: office
+  password: 2ee4befb-015e-41e9-be59-8a0d58744c38  # Move to secret in production
   connectionTimeout: "300s"
   compression: "zlib"
   pingInterval: "30s"
-  minConnections: 10
-  maxConnections: 50
+  minConnections: 100
+  maxConnections: 200
 
 # Redis configuration
 redis:
   host: redis-master.rgs-infrastructure.svc.cluster.local
   port: 6379
+  password: ninja-admin  # Move to secret in production
   basePrefix: svc.backoffice
 
 # RabbitMQ configuration
 rabbitmq:
   host: rabbitmq.rgs-infrastructure.svc.cluster.local
   port: 5672
+  username: user
+  password: ninja-admin  # Move to secret in production
+
+# Mailgun configuration
+mailgun:
+  domain: helloworld.example
+  apiKey: no-key  # Replace with actual API key in production
+
+# JWT configuration
+jwt:
+  headerName: "X-Auth"
+  queryName: "token"
+  headerScheme: ""
+  fingerprint: bb5f803a-b8c8-4234-8eef-01799320784d  # Generate new one for production
+  accessTokenLifetime: "24h"
+  refreshTokenLifetime: "720h"
+  issuer: "svc.backoffice"
+
+# TOTP configuration
+totp:
+  issuer: backoffice.rgs-production
+  secretSize: 90
+  algorithm: 2
+  period: 30
+  digits: 6
+
+# Tracer configuration
+tracer:
+  disabled: true  # Enable in production with proper Jaeger endpoint
+  url: http://jaeger-collector.monitoring.svc.cluster.local:14268/api/traces
+  serviceName: backoffice
+
+# File configuration
+file:
+  ttl: "1h"
+
+# Lobby configuration
+lobby:
+  lobbyBaseURL: "games.ninjagaming.com"  # Update with actual domain
 
 # External secrets (if using)
 externalSecret:

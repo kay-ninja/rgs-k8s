@@ -5,51 +5,120 @@ metadata:
   labels:
     {{- include "office.labels" . | nindent 4 }}
 data:
-  NODE_ENV: {{ .Values.config.env | quote }}
-  LOG_LEVEL: {{ .Values.config.logLevel | quote }}
-  FRONT_URL: {{ .Values.config.frontURL | quote }}
-  SEND_EMAIL: {{ .Values.config.sendEmail | quote }}
-  RESET_PASSWORD_URL: {{ .Values.config.resetPasswordURL | quote }}
-  
-  # Server configuration
-  SERVER_HOST: {{ .Values.config.server.host | quote }}
-  SERVER_PORT: {{ .Values.config.server.port | quote }}
-  SERVER_READ_TIMEOUT: {{ .Values.config.server.readTimeout | quote }}
-  SERVER_WRITE_TIMEOUT: {{ .Values.config.server.writeTimeout | quote }}
-  
-  # RPC configuration
-  RPC_HOST: {{ .Values.config.rpc.host | quote }}
-  RPC_PORT: {{ .Values.config.rpc.port | quote }}
-  RPC_MAX_PROCESSING_TIME: {{ .Values.config.rpc.maxProcessingTime | quote }}
-  
-  # Service dependencies
-  HISTORY_HOST: {{ .Values.config.history.host | quote }}
-  HISTORY_PORT: {{ .Values.config.history.port | quote }}
-  HISTORY_IS_SECURE: {{ .Values.config.history.isSecure | quote }}
-  
-  OVERLORD_HOST: {{ .Values.config.overlord.host | quote }}
-  OVERLORD_PORT: {{ .Values.config.overlord.port | quote }}
-  OVERLORD_IS_SECURE: {{ .Values.config.overlord.isSecure | quote }}
-  
-  EXCHANGE_HOST: {{ .Values.config.exchange.host | quote }}
-  EXCHANGE_PORT: {{ .Values.config.exchange.port | quote }}
-  EXCHANGE_IS_SECURE: {{ .Values.config.exchange.isSecure | quote }}
-  
-  # Database configuration
-  DB_HOST: {{ .Values.database.host | quote }}
-  DB_PORT: {{ .Values.database.port | quote }}
-  DB_NAME: {{ .Values.database.name | quote }}
-  DB_CONNECTION_TIMEOUT: {{ .Values.database.connectionTimeout | quote }}
-  DB_COMPRESSION: {{ .Values.database.compression | quote }}
-  DB_PING_INTERVAL: {{ .Values.database.pingInterval | quote }}
-  DB_MIN_CONNECTIONS: {{ .Values.database.minConnections | quote }}
-  DB_MAX_CONNECTIONS: {{ .Values.database.maxConnections | quote }}
-  
-  # Redis configuration
-  REDIS_HOST: {{ .Values.redis.host | quote }}
-  REDIS_PORT: {{ .Values.redis.port | quote }}
-  REDIS_BASE_PREFIX: {{ .Values.redis.basePrefix | quote }}
-  
-  # RabbitMQ configuration
-  RABBITMQ_HOST: {{ .Values.rabbitmq.host | quote }}
-  RABBITMQ_PORT: {{ .Values.rabbitmq.port | quote }}
+  config.yaml: |
+    env: {{ .Values.config.env }}
+    logLevel: {{ .Values.config.logLevel }}
+    frontURL: {{ .Values.config.frontURL }}
+    sendEmail: {{ .Values.config.sendEmail }}
+    resetPasswordURL: {{ .Values.config.resetPasswordURL }}
+
+    client:
+      logoUrl: {{ .Values.config.client.logoUrl }}
+      environmentName: {{ .Values.config.client.environmentName | quote }}
+
+    server:
+      host: {{ .Values.config.server.host | quote }}
+      port: {{ .Values.config.server.port }}
+      readTimeout: {{ .Values.config.server.readTimeout | quote }}
+      writeTimeout: {{ .Values.config.server.writeTimeout | quote }}
+
+    rpc:
+      host: {{ .Values.config.rpc.host | quote }}
+      port: {{ .Values.config.rpc.port }}
+      maxProcessingTime: {{ .Values.config.rpc.maxProcessingTime }}ms
+
+    history:
+      host: {{ .Values.config.history.host }}
+      port: {{ .Values.config.history.port }}
+      isSecure: {{ .Values.config.history.isSecure }}
+
+    overlord:
+      host: {{ .Values.config.overlord.host }}
+      port: {{ .Values.config.overlord.port }}
+      isSecure: {{ .Values.config.overlord.isSecure }}
+
+    exchange:
+      host: {{ .Values.config.exchange.host }}
+      port: {{ .Values.config.exchange.port }}
+      isSecure: {{ .Values.config.exchange.isSecure }}
+
+    database:
+      host: {{ .Values.database.host }}
+      port: {{ .Values.database.port }}
+      name: {{ .Values.database.name }}
+      user: {{ .Values.database.user }}
+      {{- if .Values.database.password }}
+      pass: {{ .Values.database.password }}
+      {{- end }}
+      connectionTimeout: {{ .Values.database.connectionTimeout | quote }}
+      compression: {{ .Values.database.compression | quote }}
+      pingInterval: {{ .Values.database.pingInterval | quote }}
+      minConnections: {{ .Values.database.minConnections }}
+      maxConnections: {{ .Values.database.maxConnections }}
+
+    redis:
+      host: {{ .Values.redis.host }}
+      port: {{ .Values.redis.port }}
+      {{- if .Values.redis.password }}
+      pass: {{ .Values.redis.password }}
+      {{- end }}
+      basePrefix: {{ .Values.redis.basePrefix }}
+
+    queue:
+      listeners:
+        backoffice:
+          exchangeBase: backoffice
+          exchangeKind: "direct"
+          queueBase: backoffice
+          bindingKey: backoffice
+          hashedQueueName: false
+          durable: true
+          autoDelete: false
+          exchangeInternal: true
+          exchangeNoWait: true
+          count: 10
+      publishers:
+        overlord:
+          exchangeBase: overlord
+          exchangeKind: "fanout"
+          bindingKey: overlord
+      host:
+        name: main
+        host: {{ .Values.rabbitmq.host }}
+        port: {{ .Values.rabbitmq.port }}
+        username: {{ .Values.rabbitmq.username }}
+        password: {{ .Values.rabbitmq.password }}
+      options:
+        retryTimes: 5
+        backOffSeconds: 2
+
+    mailgun:
+      domain: {{ .Values.mailgun.domain }}
+      apiKey: {{ .Values.mailgun.apiKey }}
+
+    jwt:
+      headerName: "X-Auth"
+      queryName: "token"
+      headerScheme: ""
+      fingerprint: {{ .Values.jwt.fingerprint }}
+      accessTokenLifetime: {{ .Values.jwt.accessTokenLifetime | quote }}
+      refreshTokenLifetime: {{ .Values.jwt.refreshTokenLifetime | quote }}
+      issuer: {{ .Values.jwt.issuer | quote }}
+
+    totp:
+      issuer: {{ .Values.totp.issuer }}
+      secretSize: {{ .Values.totp.secretSize }}
+      algorithm: {{ .Values.totp.algorithm }}
+      period: {{ .Values.totp.period }}
+      digits: {{ .Values.totp.digits }}
+
+    tracer:
+      disabled: {{ .Values.tracer.disabled }}
+      url: {{ .Values.tracer.url }}
+      serviceName: {{ .Values.tracer.serviceName }}
+
+    file:
+      ttl: {{ .Values.file.ttl | quote }}
+
+    lobby:
+      lobbyBaseURL: {{ .Values.lobby.lobbyBaseURL | quote }}
