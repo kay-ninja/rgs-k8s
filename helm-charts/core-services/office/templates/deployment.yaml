@@ -74,6 +74,12 @@ spec:
         resources:
           {{- toYaml .Values.resources.server | nindent 12 }}
         volumeMounts:
+        # Mount the config file to /app/config.yaml (matching docker-compose)
+        - name: config
+          mountPath: /app/config.yaml
+          subPath: config
+          readOnly: true
+        # Also mount to /app/config (without extension) as the error suggests it looks there
         - name: config
           mountPath: /app/config
           subPath: config
@@ -84,9 +90,6 @@ spec:
       - name: config
         configMap:
           name: {{ include "office.fullname" . }}-config
-          items:
-          - key: config
-            path: config
       - name: tmp
         emptyDir: {}
       {{- with .Values.nodeSelector }}
