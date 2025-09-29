@@ -1,36 +1,10 @@
-# ArgoCD App of Apps - RGS Platform
-# This is the main application that manages all other applications
-apiVersion: argoproj.io/v1alpha1
-kind: Application
-metadata:
-  name: rgs-platform
-  namespace: argocd
-  finalizers:
-    - resources-finalizer.argocd.argoproj.io
-spec:
-  project: default
-  source:
-    repoURL:  https://github.com/kay-ninja/rgs-k8s
-    targetRevision: HEAD
-    path: argocd/apps
-  destination:
-    server: https://kubernetes.default.svc
-    namespace: argocd
-  syncPolicy:
-    automated:
-      prune: true
-      selfHeal: true
-      allowEmpty: false
-    syncOptions:
-      - CreateNamespace=true
-    retry:
-      limit: 5
-      backoff:
-        duration: 5s
-        factor: 2
-        maxDuration: 3m
+# ArgoCD App of Apps - RGS Platform (CORRECTED)
+# Remove the unnecessary main application since we're using ApplicationSets
 ---
 # Infrastructure Applications
+# NOTE: You need to either:
+# 1. Create helm-charts/infrastructure/ charts, OR
+# 2. Use public Helm charts from bitnami
 apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
 metadata:
@@ -42,12 +16,22 @@ spec:
       elements:
       - name: postgresql
         namespace: rgs-infrastructure
+        chart: postgresql
+        repoURL: https://charts.bitnami.com/bitnami
+        version: "12.1.9"
+        valueslocation: $values/infrastructure-values/postgresql-values.yaml
       - name: redis
         namespace: rgs-infrastructure
+        chart: redis
+        repoURL: https://charts.bitnami.com/bitnami
+        version: "17.3.14"
+        valueslocation: $values/infrastructure-values/postgresql-values.yaml
       - name: rabbitmq
         namespace: rgs-infrastructure
-      - name: mysql
-        namespace: rgs-infrastructure
+        chart: rabbitmq
+        repoURL: https://charts.bitnami.com/bitnami
+        version: "11.1.3"
+        valueslocation: $values/infrastructure-values/postgresql-values.yaml
   template:
     metadata:
       name: '{{name}}'
@@ -55,13 +39,12 @@ spec:
     spec:
       project: infrastructure
       source:
-        repoURL:  https://github.com/kay-ninja/rgs-k8s
-        targetRevision: HEAD
-        path: 'helm-charts/infrastructure/{{name}}'
+        repoURL: '{{repoURL}}'
+        chart: '{{chart}}'
+        targetRevision: '{{version}}'
         helm:
           valueFiles:
-          - values.yaml
-          - values-production.yaml
+          - '{{valueslocation}}'
       destination:
         server: https://kubernetes.default.svc
         namespace: '{{namespace}}'
@@ -72,7 +55,7 @@ spec:
         syncOptions:
         - CreateNamespace=true
 ---
-# Core Services Applications
+# Core Services Applications (WORKING)
 apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
 metadata:
@@ -84,25 +67,25 @@ spec:
       elements:
       - name: office
         namespace: rgs-core
-        replicas: 3
+        replicas: 2
       - name: exchange
         namespace: rgs-core
-        replicas: 3
+        replicas: 2
       - name: history
         namespace: rgs-core
-        replicas: 3
+        replicas: 2
       - name: launch
         namespace: rgs-core
-        replicas: 3
+        replicas: 2
       - name: overlord
         namespace: rgs-core
-        replicas: 3
+        replicas: 2
       - name: pfr
         namespace: rgs-core
-        replicas: 3
+        replicas: 2
       - name: rng
         namespace: rgs-core
-        replicas: 3
+        replicas: 2
       - name: adaptor
         namespace: rgs-core
         replicas: 2
@@ -116,7 +99,7 @@ spec:
     spec:
       project: core-services
       source:
-        repoURL:  https://github.com/kay-ninja/rgs-k8s
+        repoURL: https://github.com/kay-ninja/rgs-k8s
         targetRevision: HEAD
         path: 'helm-charts/core-services/{{name}}'
         helm:
@@ -125,7 +108,6 @@ spec:
             value: '{{replicas}}'
           valueFiles:
           - values.yaml
-          - values-production.yaml
       destination:
         server: https://kubernetes.default.svc
         namespace: '{{namespace}}'
@@ -142,7 +124,7 @@ spec:
             factor: 2
             maxDuration: 3m
 ---
-# Game Services Application Set
+# Game Services Application Set (WORKING)
 apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
 metadata:
@@ -151,7 +133,7 @@ metadata:
 spec:
   generators:
   - git:
-      repoURL:  https://github.com/kay-ninja/rgs-k8s
+      repoURL: https://github.com/kay-ninja/rgs-k8s
       revision: HEAD
       directories:
       - path: helm-charts/game-services/*
@@ -165,13 +147,12 @@ spec:
     spec:
       project: games
       source:
-        repoURL:  https://github.com/kay-ninja/rgs-k8s
+        repoURL: https://github.com/kay-ninja/rgs-k8s
         targetRevision: HEAD
         path: '{{path}}'
         helm:
           valueFiles:
           - values.yaml
-          - values-production.yaml
       destination:
         server: https://kubernetes.default.svc
         namespace: rgs-games
@@ -182,7 +163,7 @@ spec:
         syncOptions:
         - CreateNamespace=true
 ---
-# Istio Configuration Application
+# Istio Configuration Application (WORKING)
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
@@ -191,7 +172,7 @@ metadata:
 spec:
   project: networking
   source:
-    repoURL:  https://github.com/kay-ninja/rgs-k8s
+    repoURL: https://github.com/kay-ninja/rgs-k8s
     targetRevision: HEAD
     path: istio
   destination:
@@ -204,7 +185,7 @@ spec:
     syncOptions:
     - CreateNamespace=false
 ---
-# ArgoCD Projects
+# ArgoCD Projects (FIXED - removed spaces)
 apiVersion: argoproj.io/v1alpha1
 kind: AppProject
 metadata:
@@ -213,7 +194,8 @@ metadata:
 spec:
   description: Infrastructure components
   sourceRepos:
-  - ' https://github.com/kay-ninja/rgs-k8s'
+  - 'https://github.com/kay-ninja/rgs-k8s'
+  - 'https://charts.bitnami.com/bitnami'  # Added for external charts
   destinations:
   - namespace: 'rgs-infrastructure'
     server: https://kubernetes.default.svc
@@ -232,7 +214,7 @@ metadata:
 spec:
   description: Core RGS services
   sourceRepos:
-  - ' https://github.com/kay-ninja/rgs-k8s'
+  - 'https://github.com/kay-ninja/rgs-k8s'
   destinations:
   - namespace: 'rgs-core'
     server: https://kubernetes.default.svc
@@ -251,7 +233,7 @@ metadata:
 spec:
   description: Game services
   sourceRepos:
-  - ' https://github.com/kay-ninja/rgs-k8s'
+  - 'https://github.com/kay-ninja/rgs-k8s'
   destinations:
   - namespace: 'rgs-games'
     server: https://kubernetes.default.svc
@@ -270,7 +252,7 @@ metadata:
 spec:
   description: Networking and traffic management
   sourceRepos:
-  - ' https://github.com/kay-ninja/rgs-k8s'
+  - 'https://github.com/kay-ninja/rgs-k8s'
   destinations:
   - namespace: 'istio-system'
     server: https://kubernetes.default.svc

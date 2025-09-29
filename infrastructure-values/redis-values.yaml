@@ -1,0 +1,56 @@
+# Redis Values for RGS Platform
+# Using Bitnami Redis chart
+
+architecture: standalone  # Use "replication" for HA in production
+
+auth:
+  enabled: true
+  password: "changeme-redis-password"
+  
+master:
+  persistence:
+    enabled: true
+    size: 8Gi
+    storageClass: "standard"  # Change based on your cluster
+    
+  resources:
+    requests:
+      memory: "512Mi"
+      cpu: "250m"
+    limits:
+      memory: "1Gi"
+      cpu: "500m"
+      
+  service:
+    type: ClusterIP
+    ports:
+      redis: 6379
+      
+# Only if architecture: replication
+replica:
+  replicaCount: 2
+  persistence:
+    enabled: true
+    size: 8Gi
+    
+metrics:
+  enabled: true
+  serviceMonitor:
+    enabled: false  # Enable if you have Prometheus operator
+    
+sentinel:
+  enabled: false  # Enable for HA with replication
+  
+volumePermissions:
+  enabled: false
+  
+serviceAccount:
+  create: true
+  
+commonAnnotations:
+  app: redis
+  component: cache
+  
+networkPolicy:
+  enabled: false  # Enable in production
+  allowExternal: false
