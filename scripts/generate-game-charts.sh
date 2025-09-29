@@ -118,7 +118,7 @@ client:
     tag: "" # Uses appVersion if not set
 
 imagePullSecrets:
-  - name: regcred
+  - name: docker-registry-credentials
 
 service:
   type: ClusterIP

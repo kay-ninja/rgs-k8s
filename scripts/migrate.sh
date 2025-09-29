@@ -88,7 +88,7 @@ create_secrets() {
     read -s -p "Docker Registry Password: " DOCKER_PASS
     echo
     
-    kubectl create secret docker-registry regcred \
+    kubectl create secret docker-registry docker-registry-credentials \
         --docker-server=$DOCKER_REGISTRY \
         --docker-username=$DOCKER_USER \
         --docker-password=$DOCKER_PASS \
@@ -96,11 +96,11 @@ create_secrets() {
         --dry-run=client -o yaml | kubectl apply -f -
     
     # Copy to other namespaces
-    kubectl get secret regcred -n $NAMESPACE_INFRA -o yaml | \
+    kubectl get secret docker-registry-credentials -n $NAMESPACE_INFRA -o yaml | \
         sed "s/namespace: $NAMESPACE_INFRA/namespace: $NAMESPACE_CORE/" | \
         kubectl apply -f -
     
-    kubectl get secret regcred -n $NAMESPACE_INFRA -o yaml | \
+    kubectl get secret docker-registry-credentials -n $NAMESPACE_INFRA -o yaml | \
         sed "s/namespace: $NAMESPACE_INFRA/namespace: $NAMESPACE_GAMES/" | \
         kubectl apply -f -
     

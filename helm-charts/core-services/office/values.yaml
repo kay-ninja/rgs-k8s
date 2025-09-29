@@ -19,7 +19,7 @@ client:
     pullPolicy: IfNotPresent
 
 imagePullSecrets:
-  - name: regcred
+  - name: docker-registry-credentials
 
 nameOverride: ""
 fullnameOverride: ""

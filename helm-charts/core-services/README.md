@@ -132,7 +132,7 @@ helm install adaptor ./core-services-charts/adaptor -n rgs-core
 
 2. **Docker Registry Secret**:
 ```bash
-kubectl create secret docker-registry regcred \
+kubectl create secret docker-registry docker-registry-credentials \
   --docker-server=rg.fr-par.scw.cloud \
   --docker-username=YOUR_USERNAME \
   --docker-password=YOUR_PASSWORD \
