@@ -5,7 +5,7 @@ metadata:
   labels:
     {{- include "office.labels" . | nindent 4 }}
 data:
-  config.yaml: |
+  config: |
     env: {{ .Values.config.env }}
     logLevel: {{ .Values.config.logLevel }}
     frontURL: {{ .Values.config.frontURL }}

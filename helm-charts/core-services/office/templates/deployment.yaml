@@ -76,7 +76,7 @@ spec:
         volumeMounts:
         - name: config
           mountPath: /app/config
-          subPath: config.yaml
+          subPath: config
           readOnly: true
         - name: tmp
           mountPath: /tmp
@@ -85,8 +85,8 @@ spec:
         configMap:
           name: {{ include "office.fullname" . }}-config
           items:
-          - key: config.yaml
-            path: config.yaml
+          - key: config
+            path: config
       - name: tmp
         emptyDir: {}
       {{- with .Values.nodeSelector }}
