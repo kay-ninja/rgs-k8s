@@ -75,8 +75,7 @@ spec:
           {{- toYaml .Values.resources.server | nindent 12 }}
         volumeMounts:
         - name: config
-          mountPath: /app/config
-          subPath: config
+          mountPath: /app
           readOnly: true
         - name: tmp
           mountPath: /tmp
