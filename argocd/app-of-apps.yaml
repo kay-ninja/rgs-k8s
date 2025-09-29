@@ -1,10 +1,6 @@
-# ArgoCD App of Apps - RGS Platform (CORRECTED)
-# Remove the unnecessary main application since we're using ApplicationSets
+# ArgoCD App of Apps - RGS Platform (FULLY FIXED)
 ---
-# Infrastructure Applications
-# NOTE: You need to either:
-# 1. Create helm-charts/infrastructure/ charts, OR
-# 2. Use public Helm charts from bitnami
+# Infrastructure Applications - FIXED to use Bitnami charts directly with inline values
 apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
 metadata:
@@ -16,22 +12,10 @@ spec:
       elements:
       - name: postgresql
         namespace: rgs-infrastructure
-        chart: postgresql
-        repoURL: https://charts.bitnami.com/bitnami
-        version: "12.1.9"
-        valueslocation: $values/infrastructure-values/postgresql-values.yaml
       - name: redis
         namespace: rgs-infrastructure
-        chart: redis
-        repoURL: https://charts.bitnami.com/bitnami
-        version: "17.3.14"
-        valueslocation: $values/infrastructure-values/postgresql-values.yaml
       - name: rabbitmq
         namespace: rgs-infrastructure
-        chart: rabbitmq
-        repoURL: https://charts.bitnami.com/bitnami
-        version: "11.1.3"
-        valueslocation: $values/infrastructure-values/postgresql-values.yaml
   template:
     metadata:
       name: '{{name}}'
@@ -39,12 +23,74 @@ spec:
     spec:
       project: infrastructure
       source:
-        repoURL: '{{repoURL}}'
-        chart: '{{chart}}'
-        targetRevision: '{{version}}'
+        repoURL: https://charts.bitnami.com/bitnami
+        chart: '{{name}}'
+        targetRevision: |-
+          {{- if eq .name "postgresql" }}12.1.9{{- end }}
+          {{- if eq .name "redis" }}17.3.14{{- end }}
+          {{- if eq .name "rabbitmq" }}11.1.3{{- end }}
         helm:
-          valueFiles:
-          - '{{valueslocation}}'
+          values: |-
+            {{- if eq .name "postgresql" }}
+            auth:
+              enablePostgresUser: true
+              postgresPassword: "changeme-postgres-password"
+              database: "rgs"
+            initdbScripts:
+              init.sql: |
+                CREATE DATABASE office;
+                CREATE DATABASE exchange;
+                CREATE DATABASE history;
+                CREATE DATABASE launch;
+                CREATE DATABASE overlord;
+                CREATE DATABASE pfr;
+                CREATE DATABASE rng;
+                CREATE DATABASE adaptor;
+            primary:
+              persistence:
+                enabled: true
+                size: 10Gi
+              resources:
+                requests:
+                  memory: "512Mi"
+                  cpu: "250m"
+                limits:
+                  memory: "1Gi"
+                  cpu: "500m"
+            {{- end }}
+            {{- if eq .name "redis" }}
+            architecture: standalone
+            auth:
+              enabled: true
+              password: "changeme-redis-password"
+            master:
+              persistence:
+                enabled: true
+                size: 5Gi
+              resources:
+                requests:
+                  memory: "256Mi"
+                  cpu: "100m"
+                limits:
+                  memory: "512Mi"
+                  cpu: "250m"
+            {{- end }}
+            {{- if eq .name "rabbitmq" }}
+            auth:
+              username: "rgs-user"
+              password: "changeme-rabbitmq-password"
+              erlangCookie: "changeme-erlang-cookie"
+            persistence:
+              enabled: true
+              size: 5Gi
+            resources:
+              requests:
+                memory: "256Mi"
+                cpu: "100m"
+              limits:
+                memory: "512Mi"
+                cpu: "250m"
+            {{- end }}
       destination:
         server: https://kubernetes.default.svc
         namespace: '{{namespace}}'
@@ -55,7 +101,7 @@ spec:
         syncOptions:
         - CreateNamespace=true
 ---
-# Core Services Applications (WORKING)
+# Core Services Applications - FIXED (removed problematic parameters)
 apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
 metadata:
@@ -67,28 +113,20 @@ spec:
       elements:
       - name: office
         namespace: rgs-core
-        replicas: 2
       - name: exchange
         namespace: rgs-core
-        replicas: 2
       - name: history
         namespace: rgs-core
-        replicas: 2
       - name: launch
         namespace: rgs-core
-        replicas: 2
       - name: overlord
         namespace: rgs-core
-        replicas: 2
       - name: pfr
         namespace: rgs-core
-        replicas: 2
       - name: rng
         namespace: rgs-core
-        replicas: 2
       - name: adaptor
         namespace: rgs-core
-        replicas: 2
   template:
     metadata:
       name: '{{name}}-service'
@@ -103,9 +141,7 @@ spec:
         targetRevision: HEAD
         path: 'helm-charts/core-services/{{name}}'
         helm:
-          parameters:
-          - name: replicaCount
-            value: '{{replicas}}'
+          # REMOVED problematic parameters section
           valueFiles:
           - values.yaml
       destination:
@@ -124,7 +160,7 @@ spec:
             factor: 2
             maxDuration: 3m
 ---
-# Game Services Application Set (WORKING)
+# Game Services Application Set
 apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
 metadata:
@@ -163,7 +199,7 @@ spec:
         syncOptions:
         - CreateNamespace=true
 ---
-# Istio Configuration Application (WORKING)
+# Istio Configuration Application
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
@@ -185,7 +221,7 @@ spec:
     syncOptions:
     - CreateNamespace=false
 ---
-# ArgoCD Projects (FIXED - removed spaces)
+# ArgoCD Projects
 apiVersion: argoproj.io/v1alpha1
 kind: AppProject
 metadata:
@@ -195,7 +231,7 @@ spec:
   description: Infrastructure components
   sourceRepos:
   - 'https://github.com/kay-ninja/rgs-k8s'
-  - 'https://charts.bitnami.com/bitnami'  # Added for external charts
+  - 'https://charts.bitnami.com/bitnami'
   destinations:
   - namespace: 'rgs-infrastructure'
     server: https://kubernetes.default.svc
