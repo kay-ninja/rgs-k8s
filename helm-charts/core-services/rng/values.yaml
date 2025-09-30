@@ -5,7 +5,9 @@ image:
   pullPolicy: IfNotPresent
   tag: "0.0.5"
 
-imagePullSecrets: []
+imagePullSecrets:
+  - name: docker-registry-credentials
+
 nameOverride: ""
 fullnameOverride: ""
 
