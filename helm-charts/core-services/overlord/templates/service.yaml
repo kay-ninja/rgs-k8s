@@ -28,13 +28,13 @@ metadata:
 spec:
   type: ClusterIP
   ports:
-  - port: {{ .Values.service.httpPort }}
-    targetPort: http
-    protocol: TCP
-    name: http
   - port: {{ .Values.service.grpcPort }}
     targetPort: grpc
     protocol: TCP
     name: grpc
+  - port: {{ .Values.service.httpPort }}
+    targetPort: http
+    protocol: TCP
+    name: http
   selector:
     {{- include "overlord.selectorLabels" . | nindent 4 }}

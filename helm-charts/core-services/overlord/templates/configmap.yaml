@@ -5,33 +5,111 @@ metadata:
   labels:
     {{- include "overlord.labels" . | nindent 4 }}
 data:
-  NODE_ENV: {{ .Values.config.env | quote }}
-  LOG_LEVEL: {{ .Values.config.logLevel | quote }}
-  
-  # Server configuration
-  SERVER_HOST: {{ .Values.config.server.host | quote }}
-  SERVER_PORT: {{ .Values.config.server.port | quote }}
-  SERVER_READ_TIMEOUT: {{ .Values.config.server.readTimeout | quote }}
-  SERVER_WRITE_TIMEOUT: {{ .Values.config.server.writeTimeout | quote }}
-  
-  # RPC configuration
-  RPC_HOST: {{ .Values.config.rpc.host | quote }}
-  RPC_PORT: {{ .Values.config.rpc.port | quote }}
-  RPC_MAX_PROCESSING_TIME: {{ .Values.config.rpc.maxProcessingTime | quote }}
-  
-  # Database configuration
-  DB_HOST: {{ .Values.database.host | quote }}
-  DB_PORT: {{ .Values.database.port | quote }}
-  DB_NAME: {{ .Values.database.name | quote }}
-  DB_CONNECTION_TIMEOUT: {{ .Values.database.connectionTimeout | quote }}
-  DB_MIN_CONNECTIONS: {{ .Values.database.minConnections | quote }}
-  DB_MAX_CONNECTIONS: {{ .Values.database.maxConnections | quote }}
-  
-  # Redis configuration
-  REDIS_HOST: {{ .Values.redis.host | quote }}
-  REDIS_PORT: {{ .Values.redis.port | quote }}
-  REDIS_BASE_PREFIX: {{ .Values.redis.basePrefix | quote }}
-  
-  # RabbitMQ configuration
-  RABBITMQ_HOST: {{ .Values.rabbitmq.host | quote }}
-  RABBITMQ_PORT: {{ .Values.rabbitmq.port | quote }}
+  config: |
+    server:
+      host: 0.0.0.0
+      port: 7510
+      readTimeout: 30s
+      writeTimeout: 30s
+
+    rpc:
+      host: 0.0.0.0
+      port: 7500
+      maxProcessingTime: 30000ms
+
+    history:
+      host: {{ .Values.config.history.host }}
+      port: {{ .Values.config.history.port }}
+      isSecure: {{ .Values.config.history.isSecure }}
+
+    pfr:
+      host: {{ .Values.config.pfr.host }}
+      port: {{ .Values.config.pfr.port }}
+      isSecure: {{ .Values.config.pfr.isSecure }}
+
+    database:
+      host: {{ .Values.database.host }}
+      port: {{ .Values.database.port }}
+      name: {{ .Values.database.name }}
+      user: {{ .Values.database.user }}
+      pass: {{ .Values.database.password }}
+      connectionTimeout: {{ .Values.database.connectionTimeout | quote }}
+      compression: {{ .Values.database.compression }}
+      pingInterval: {{ .Values.database.pingInterval | quote }}
+      minConnections: {{ .Values.database.minConnections }}
+      maxConnections: {{ .Values.database.maxConnections }}
+
+    queue:
+      listeners:
+        overlord:
+          exchangeBase: overlord
+          exchangeKind: "fanout"
+          queueBase: overlord
+          bindingKey: overlord
+          hashedQueueName: true
+          durable: true
+          autoDelete: true
+          exchangeInternal: true
+          exchangeNoWait: true
+      publishers:
+        backoffice:
+          exchangeBase: backoffice
+          exchangeKind: "direct"
+          bindingKey: backoffice
+      host:
+        name: main
+        host: {{ .Values.rabbitmq.host }}
+        port: {{ .Values.rabbitmq.port }}
+        username: {{ .Values.rabbitmq.username }}
+        password: {{ .Values.rabbitmq.password }}
+      options:
+        retryTimes: 5
+        backOffSeconds: 2
+
+    redis:
+      host: {{ .Values.redis.host }}
+      port: {{ .Values.redis.port }}
+      pass: {{ .Values.redis.password | quote }}
+      prefix: svc.overlord
+      session_expiration: 28800s
+
+    slots:
+      maxTransactionCount:
+        aviator: 2
+        paper-toss: 2
+        aviatron: 2
+        baseball-crash: 4
+        danger-zone: 4
+        default: 0
+
+    integrators:
+      ninjagaming_lb:
+        apiSecret: {{ .Values.integrators.ninjagaming.apiSecret }}
+        baseUrl: {{ .Values.integrators.ninjagaming.baseUrl }}
+        withLogs: {{ .Values.integrators.ninjagaming.withLogs }}
+      direct:
+        mockdirect:
+          apiKey: {{ .Values.integrators.direct.apiKey }}
+          apiSecret: {{ .Values.integrators.direct.apiSecret }}
+          url: {{ .Values.integrators.direct.url }}
+          withLogs: {{ .Values.integrators.direct.withLogs }}
+      mock: null
+
+    providers: 
+      heronbyte:
+        withLogs: {{ .Values.providers.heronbyte.withLogs }}
+
+    notSumFreeSpins:
+      - pokerdom
+      - zaza
+      - mock
+
+    tracer:
+      disabled: {{ .Values.tracer.disabled }}
+      url: {{ .Values.tracer.url }}
+      serviceName: {{ .Values.tracer.serviceName }}
+
+    lemonWhiteList: []
+
+    logger:
+      logLevel: {{ .Values.logger.logLevel }}
