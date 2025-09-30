@@ -1,14 +1,15 @@
 apiVersion: v2
 name: history
-description: RGS Game history and audit service
+description: RGS History Service - Game history and transaction management
 type: application
 version: 1.0.0
-appVersion: "1.0.39"
+appVersion: "1.0.98"
 keywords:
   - rgs
   - history
-  - core-service
-home:  https://github.com/kay-ninja/rgs-k8s
+  - gaming
+  - transactions
+home: https://github.com/your-repo/rgs-k8s
 maintainers:
   - name: Platform Team
-    email: kayode@ninjagaming.com
+    email: your-email@example.com

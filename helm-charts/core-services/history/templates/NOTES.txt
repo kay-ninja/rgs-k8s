@@ -1,0 +1,16 @@
+Thank you for installing {{ .Chart.Name }}!
+
+Your release is named {{ .Release.Name }}.
+
+Service Endpoints:
+  HTTP: {{ include "history.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.service.httpPort }}
+  gRPC: {{ include "history.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.service.grpcPort }}
+
+IMPORTANT: GeoIP Database Setup
+The History service requires a pre-created PVC named: {{ .Values.geoip.pvcName }}
+This PVC must contain the MaxMind GeoIP2 Country database at: country.mmdb
+
+If you haven't created the PVC yet, see the deployment documentation.
+
+Health Check:
+  kubectl exec -it deployment/{{ include "history.fullname" . }} -n {{ .Release.Namespace }} -- wget -qO- localhost:{{ .Values.service.httpPort }}/health

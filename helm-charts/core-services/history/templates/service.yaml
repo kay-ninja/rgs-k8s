@@ -4,29 +4,12 @@ metadata:
   name: {{ include "history.fullname" . }}
   labels:
     {{- include "history.labels" . | nindent 4 }}
+  {{- with .Values.service.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
 spec:
   type: {{ .Values.service.type }}
-  ports:
-  - port: {{ .Values.service.grpcPort }}
-    targetPort: grpc
-    protocol: TCP
-    name: grpc
-  - port: {{ .Values.service.httpPort }}
-    targetPort: http
-    protocol: TCP
-    name: http
-  selector:
-    {{- include "history.selectorLabels" . | nindent 4 }}
----
-# Headless service for internal communication
-apiVersion: v1
-kind: Service
-metadata:
-  name: history
-  labels:
-    {{- include "history.labels" . | nindent 4 }}
-spec:
-  type: ClusterIP
   ports:
   - port: {{ .Values.service.httpPort }}
     targetPort: http

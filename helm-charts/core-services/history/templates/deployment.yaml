@@ -31,52 +31,76 @@ spec:
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       containers:
-      - name: history
+      - name: {{ .Chart.Name }}
         securityContext:
           {{- toYaml .Values.securityContext | nindent 12 }}
-        image: "{{ .Values.image.registry }}/{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
-        ports:
-        - name: grpc
-          containerPort: {{ .Values.config.rpc.port }}
-          protocol: TCP
-        - name: http
-          containerPort: {{ .Values.config.server.port }}
-          protocol: TCP
         env:
-        - name: NODE_ENV
-          value: {{ .Values.config.env }}
-        - name: POD_NAME
-          valueFrom:
-            fieldRef:
-              fieldPath: metadata.name
-        - name: POD_NAMESPACE
-          valueFrom:
-            fieldRef:
-              fieldPath: metadata.namespace
-        envFrom:
-        - configMapRef:
-            name: {{ include "history.fullname" . }}-config
-        - secretRef:
-            name: {{ include "history.fullname" . }}-secret
-            optional: true
+        - name: GOMAXPROCS
+          value: {{ .Values.env.gomaxprocs | quote }}
+        {{- with .Values.extraEnv }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+        ports:
+        - name: http
+          containerPort: {{ .Values.service.httpPort }}
+          protocol: TCP
+        - name: grpc
+          containerPort: {{ .Values.service.grpcPort }}
+          protocol: TCP
         livenessProbe:
-          {{- toYaml .Values.livenessProbe | nindent 12 }}
+          httpGet:
+            path: /health
+            port: http
+          initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
+          periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
+          timeoutSeconds: {{ .Values.livenessProbe.timeoutSeconds }}
+          successThreshold: {{ .Values.livenessProbe.successThreshold }}
+          failureThreshold: {{ .Values.livenessProbe.failureThreshold }}
         readinessProbe:
-          {{- toYaml .Values.readinessProbe | nindent 12 }}
+          httpGet:
+            path: /health
+            port: http
+          initialDelaySeconds: {{ .Values.readinessProbe.initialDelaySeconds }}
+          periodSeconds: {{ .Values.readinessProbe.periodSeconds }}
+          timeoutSeconds: {{ .Values.readinessProbe.timeoutSeconds }}
+          successThreshold: {{ .Values.readinessProbe.successThreshold }}
+          failureThreshold: {{ .Values.readinessProbe.failureThreshold }}
         resources:
           {{- toYaml .Values.resources | nindent 12 }}
         volumeMounts:
         - name: config
-          mountPath: /app/config
-        - name: tmp
-          mountPath: /tmp
+          mountPath: /app/config.yaml
+          subPath: config.yaml
+          readOnly: true
+        - name: geoip
+          mountPath: /app/data/ip2country/country.mmdb
+          subPath: country.mmdb
+          readOnly: true
+        - name: shm
+          mountPath: /dev/shm
+        {{- with .Values.volumeMounts }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
       volumes:
       - name: config
         configMap:
           name: {{ include "history.fullname" . }}-config
-      - name: tmp
-        emptyDir: {}
+      - name: geoip
+        persistentVolumeClaim:
+          claimName: {{ .Values.geoip.pvcName }}
+      - name: shm
+        emptyDir:
+          medium: Memory
+          sizeLimit: {{ .Values.shmSize }}
+      - name: shm
+        emptyDir:
+          medium: Memory
+          sizeLimit: {{ .Values.shmSize }}
+      {{- with .Values.volumes }}
+      {{- toYaml . | nindent 6 }}
+      {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

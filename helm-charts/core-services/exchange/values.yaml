@@ -1,5 +1,5 @@
 # Default values for exchange service
-replicaCount: 2
+replicaCount: 1
 
 image:
   repository: rg.fr-par.scw.cloud/ejaw/exchange

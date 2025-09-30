@@ -1,11 +1,9 @@
-# Default values for history service
-replicaCount: 2
+replicaCount: 1
 
 image:
-  registry: rg.fr-par.scw.cloud
-  repository: ejaw/history
-  tag: "1.0.39"
+  repository: rg.fr-par.scw.cloud/ejaw/history
   pullPolicy: IfNotPresent
+  tag: "1.0.98"
 
 imagePullSecrets:
   - name: docker-registry-credentials
@@ -15,17 +13,18 @@ fullnameOverride: ""
 
 serviceAccount:
   create: true
+  automount: true
   annotations: {}
   name: ""
 
 podAnnotations:
-  sidecar.istio.io/inject: "false"  # Minimal Istio
+  sidecar.istio.io/inject: "true"
   prometheus.io/scrape: "true"
   prometheus.io/port: "7210"
 
+podLabels: {}
+
 podSecurityContext:
-  runAsNonRoot: true
-  runAsUser: 1000
   fsGroup: 1000
 
 securityContext:
@@ -33,112 +32,111 @@ securityContext:
     drop:
     - ALL
   readOnlyRootFilesystem: false
-  allowPrivilegeEscalation: false
+  runAsNonRoot: true
+  runAsUser: 1000
 
 service:
   type: ClusterIP
-  grpcPort: 7200
   httpPort: 7210
+  grpcPort: 7200
   annotations: {}
+
+env:
+  gomaxprocs: "6"
+
+extraEnv: []
+
+shmSize: "1Gi"
 
 resources:
   limits:
-    cpu: 500m
-    memory: 512Mi
+    cpu: 1000m
+    memory: 2Gi
   requests:
-    cpu: 200m
-    memory: 256Mi
+    cpu: 500m
+    memory: 1Gi
+
+livenessProbe:
+  initialDelaySeconds: 10
+  periodSeconds: 10
+  timeoutSeconds: 10
+  successThreshold: 1
+  failureThreshold: 5
+
+readinessProbe:
+  initialDelaySeconds: 10
+  periodSeconds: 10
+  timeoutSeconds: 10
+  successThreshold: 1
+  failureThreshold: 3
 
 autoscaling:
   enabled: false
-  minReplicas: 2
+  minReplicas: 1
   maxReplicas: 10
-  targetCPUUtilizationPercentage: 70
+  targetCPUUtilizationPercentage: 80
+  targetMemoryUtilizationPercentage: 80
+
+volumes: []
+volumeMounts: []
 
 nodeSelector: {}
+
 tolerations: []
 
-affinity:
-  podAntiAffinity:
-    preferredDuringSchedulingIgnoredDuringExecution:
-    - weight: 100
-      podAffinityTerm:
-        labelSelector:
-          matchExpressions:
-          - key: app
-            operator: In
-            values:
-            - history
-        topologyKey: kubernetes.io/hostname
+affinity: {}
 
-# Application Configuration
+# GeoIP Database - Pre-created PVC containing country.mmdb file
+# The PVC must contain the file at: country.mmdb (64MB MaxMind GeoIP2 Country database)
+geoip:
+  pvcName: "history-geoip"
+
+# Application configuration
 config:
-  env: production
-  logLevel: info
-  
   server:
-    host: "0.0.0.0"
-    port: 7210
     readTimeout: "300s"
     writeTimeout: "300s"
-  
+
   rpc:
-    host: "0.0.0.0"
-    port: 7200
-    maxProcessingTime: 300000
-  
-  # Service dependencies
-  overlord:
-    host: overlord.rgs-core.svc.cluster.local
-    port: 7510
+    maxProcessingTime: "30000ms"
+
+  exchange:
+    host: exchange.rgs-core.svc.cluster.local
+    port: 7100
     isSecure: false
 
-# Database configuration
-database:
-  host: postgresql.rgs-infrastructure.svc.cluster.local
-  port: 5432
-  name: history
-  connectionTimeout: "300s"
-  compression: "zlib"
-  pingInterval: "30s"
-  minConnections: 10
-  maxConnections: 50
+  database:
+    host: 77.93.172.59
+    port: 5432
+    name: history
+    user: history
+    pass: "0598bab0-f85e-448c-a013-3fd4a8faf570"
+    connectionTimeout: "300s"
+    compression: "zlib"
+    pingInterval: "30s"
+    minConnections: 100
+    maxConnections: 200
 
-# Redis configuration
-redis:
-  host: redis-master.rgs-infrastructure.svc.cluster.local
-  port: 6379
-  basePrefix: svc.history
+  redis:
+    host: redis-master.rgs-infrastructure.svc.cluster.local
+    port: 6379
+    pass: "ninja-admin"
+    prefix: "svc.history-service"
 
-# RabbitMQ configuration
-rabbitmq:
-  host: rabbitmq.rgs-infrastructure.svc.cluster.local
-  port: 5672
+  tracer:
+    disabled: true
+    url: http://192.168.100.44:14268/api/traces
+    serviceName: history
 
-# Health checks
-livenessProbe:
-  httpGet:
-    path: /health
-    port: http
-  initialDelaySeconds: 30
-  periodSeconds: 10
-  timeoutSeconds: 5
-  failureThreshold: 3
+  logger:
+    logLevel: debug
 
-readinessProbe:
-  httpGet:
-    path: /health
-    port: http
-  initialDelaySeconds: 10
-  periodSeconds: 5
-  timeoutSeconds: 3
-  failureThreshold: 3
+  xe:
+    id: okBX34h8eLdRCC0RLW1DP83iLPZvBFBy
+    key: YwRQOnlxzmSCKKTqhmszGgztGS7Y6IAT
 
-# Pod Disruption Budget
-podDisruptionBudget:
-  enabled: true
-  minAvailable: 1
-
-# Network Policy
-networkPolicy:
-  enabled: false
+  ip2country:
+    cacheLifetimeHours: 24
+    ipInfoToken: ""
+    masterMode: false
+    masterURL: "https://lb:7210"
