@@ -5,33 +5,109 @@ metadata:
   labels:
     {{- include "launch.labels" . | nindent 4 }}
 data:
-  NODE_ENV: {{ .Values.config.env | quote }}
-  LOG_LEVEL: {{ .Values.config.logLevel | quote }}
-  
-  # Server configuration
-  SERVER_HOST: {{ .Values.config.server.host | quote }}
-  SERVER_PORT: {{ .Values.config.server.port | quote }}
-  SERVER_READ_TIMEOUT: {{ .Values.config.server.readTimeout | quote }}
-  SERVER_WRITE_TIMEOUT: {{ .Values.config.server.writeTimeout | quote }}
-  
-  # RPC configuration
-  RPC_HOST: {{ .Values.config.rpc.host | quote }}
-  RPC_PORT: {{ .Values.config.rpc.port | quote }}
-  RPC_MAX_PROCESSING_TIME: {{ .Values.config.rpc.maxProcessingTime | quote }}
-  
-  # Database configuration
-  DB_HOST: {{ .Values.database.host | quote }}
-  DB_PORT: {{ .Values.database.port | quote }}
-  DB_NAME: {{ .Values.database.name | quote }}
-  DB_CONNECTION_TIMEOUT: {{ .Values.database.connectionTimeout | quote }}
-  DB_MIN_CONNECTIONS: {{ .Values.database.minConnections | quote }}
-  DB_MAX_CONNECTIONS: {{ .Values.database.maxConnections | quote }}
-  
-  # Redis configuration
-  REDIS_HOST: {{ .Values.redis.host | quote }}
-  REDIS_PORT: {{ .Values.redis.port | quote }}
-  REDIS_BASE_PREFIX: {{ .Values.redis.basePrefix | quote }}
-  
-  # RabbitMQ configuration
-  RABBITMQ_HOST: {{ .Values.rabbitmq.host | quote }}
-  RABBITMQ_PORT: {{ .Values.rabbitmq.port | quote }}
+  config.yml: |
+    server:
+      host: {{ .Values.config.server.host }}
+      port: {{ .Values.config.server.port }}
+      readTimeout: {{ .Values.config.server.readTimeout }}
+      writeTimeout: {{ .Values.config.server.writeTimeout }}
+
+    backoffice:
+      host: {{ .Values.config.backoffice.host }}
+      port: {{ .Values.config.backoffice.port }}
+      isSecure: {{ .Values.config.backoffice.isSecure }}
+
+    overlord:
+      host: {{ .Values.config.overlord.host }}
+      port: {{ .Values.config.overlord.port }}
+      isSecure: {{ .Values.config.overlord.isSecure }}
+
+    launch:
+      baseURL: {{ .Values.config.launch.baseURL | quote }}
+      bfBaseURL: {{ .Values.config.launch.bfBaseURL | quote }}
+      gamehubBaseURL: {{ .Values.config.launch.gamehubBaseURL | quote }}
+      format: {{ .Values.config.launch.format | quote }}
+
+    bf:
+      baseURL: {{ .Values.config.bf.baseURL | quote }}
+      bfBaseURL: {{ .Values.config.bf.bfBaseURL | quote }}
+      apiKey: {{ .Values.config.bf.apiKey | quote }}
+
+    reish:
+      baseURL: {{ .Values.config.reish.baseURL | quote }}
+      apiKey: {{ .Values.config.reish.apiKey | quote }}
+
+    tracer:
+      disabled: {{ .Values.config.tracer.disabled }}
+      url: {{ .Values.config.tracer.url }}
+      serviceName: {{ .Values.config.tracer.serviceName }}
+
+    logger:
+      logLevel: {{ .Values.config.logger.logLevel }}
+
+    integrators:
+      direct:
+        mockdirect:
+          apiKey: {{ .Values.integrators.direct.mockdirect.apiKey }}
+          apiSecret: {{ .Values.integrators.direct.mockdirect.apiSecret }}
+          url: {{ .Values.integrators.direct.mockdirect.url }}
+          withLogs: {{ .Values.integrators.direct.mockdirect.withLogs }}
+      daintree:
+        apiKey: {{ .Values.integrators.daintree.apiKey }}
+        apiSecret: {{ .Values.integrators.daintree.apiSecret }}
+      ninjagaming_lb:
+        apiKey: {{ .Values.integrators.ninjagaming_lb.apiKey }}
+        apiSecret: {{ .Values.integrators.ninjagaming_lb.apiSecret }}
+      fixbet:
+        apiKey: {{ .Values.integrators.fixbet.apiKey }}
+        apiSecret: {{ .Values.integrators.fixbet.apiSecret }}
+      kralbet:
+        apiKey: {{ .Values.integrators.kralbet.apiKey }}
+        apiSecret: {{ .Values.integrators.kralbet.apiSecret }}
+      mariobet:
+        apiKey: {{ .Values.integrators.mariobet.apiKey }}
+        apiSecret: {{ .Values.integrators.mariobet.apiSecret }}
+      mock: {{ .Values.integrators.mock }}
+      onwin:
+        apiKey: {{ .Values.integrators.onwin.apiKey }}
+        apiSecret: {{ .Values.integrators.onwin.apiSecret }}
+      tarafbet:
+        apiKey: {{ .Values.integrators.tarafbet.apiKey }}
+        apiSecret: {{ .Values.integrators.tarafbet.apiSecret }}
+      xax:
+        apiKey: {{ .Values.integrators.xax.apiKey }}
+        apiSecret: {{ .Values.integrators.xax.apiSecret }}
+      xslot:
+        apiKey: {{ .Values.integrators.xslot.apiKey }}
+        apiSecret: {{ .Values.integrators.xslot.apiSecret }}
+      betine:
+        apiKey: {{ .Values.integrators.betine.apiKey }}
+        apiSecret: {{ .Values.integrators.betine.apiSecret }}
+      betkom:
+        apiKey: {{ .Values.integrators.betkom.apiKey }}
+        apiSecret: {{ .Values.integrators.betkom.apiSecret }}
+      supertotobet:
+        apiKey: {{ .Values.integrators.supertotobet.apiKey }}
+        apiSecret: {{ .Values.integrators.supertotobet.apiSecret }}
+      betmatik:
+        apiKey: {{ .Values.integrators.betmatik.apiKey }}
+        apiSecret: {{ .Values.integrators.betmatik.apiSecret }}
+      bayspin:
+        apiKey: {{ .Values.integrators.bayspin.apiKey }}
+        apiSecret: {{ .Values.integrators.bayspin.apiSecret }}
+      sahabet:
+        apiKey: {{ .Values.integrators.sahabet.apiKey }}
+        apiSecret: {{ .Values.integrators.sahabet.apiSecret }}
+      matadorbet:
+        apiKey: {{ .Values.integrators.matadorbet.apiKey }}
+        apiSecret: {{ .Values.integrators.matadorbet.apiSecret }}
+      betturkey:
+        apiKey: {{ .Values.integrators.betturkey.apiKey }}
+        apiSecret: {{ .Values.integrators.betturkey.apiSecret }}
+      zbahis:
+        apiKey: {{ .Values.integrators.zbahis.apiKey }}
+        apiSecret: {{ .Values.integrators.zbahis.apiSecret }}
+
+    providers:
+      ninjagaming:
+        baseURL: {{ .Values.providers.ninjagaming.baseURL | quote }}

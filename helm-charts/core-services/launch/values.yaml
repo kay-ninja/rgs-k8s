@@ -1,10 +1,9 @@
 # Default values for launch service
-replicaCount: 2
+replicaCount: 1
 
 image:
-  registry: rg.fr-par.scw.cloud
-  repository: ejaw/launch
-  tag: "1.0.37"
+  repository: rg.fr-par.scw.cloud/ejaw/launch-api
+  tag: "1.1.127"
   pullPolicy: IfNotPresent
 
 imagePullSecrets:
@@ -19,111 +18,157 @@ serviceAccount:
   name: ""
 
 podAnnotations:
-  sidecar.istio.io/inject: "false"  # Minimal Istio
+  sidecar.istio.io/inject: "false"
   prometheus.io/scrape: "true"
   prometheus.io/port: "7310"
 
 podSecurityContext:
-  runAsNonRoot: true
-  runAsUser: 1000
-  fsGroup: 1000
+  runAsNonRoot: false
+  runAsUser: 0
+  fsGroup: 0
 
 securityContext:
+  privileged: true
+  allowPrivilegeEscalation: true
+  runAsUser: 0
+  runAsNonRoot: false
   capabilities:
-    drop:
+    add:
     - ALL
   readOnlyRootFilesystem: false
-  allowPrivilegeEscalation: false
 
 service:
   type: ClusterIP
-  grpcPort: 7300
   httpPort: 7310
   annotations: {}
 
 resources:
   limits:
-    cpu: 500m
-    memory: 512Mi
+    cpu: 1000m
+    memory: 1Gi
   requests:
-    cpu: 200m
-    memory: 256Mi
+    cpu: 250m
+    memory: 512Mi
 
 autoscaling:
   enabled: false
-  minReplicas: 2
+  minReplicas: 1
   maxReplicas: 10
   targetCPUUtilizationPercentage: 70
 
 nodeSelector: {}
 tolerations: []
-
-affinity:
-  podAntiAffinity:
-    preferredDuringSchedulingIgnoredDuringExecution:
-    - weight: 100
-      podAffinityTerm:
-        labelSelector:
-          matchExpressions:
-          - key: app
-            operator: In
-            values:
-            - launch
-        topologyKey: kubernetes.io/hostname
+affinity: {}
 
 # Application Configuration
 config:
-  env: production
-  logLevel: info
-  
   server:
     host: "0.0.0.0"
     port: 7310
-    readTimeout: "300s"
-    writeTimeout: "300s"
-  
-  rpc:
-    host: "0.0.0.0"
-    port: 7300
-    maxProcessingTime: 300000
-  
-  # Service dependencies
-  history:
-    host: history.rgs-core.svc.cluster.local
-    port: 7210
+    readTimeout: "30s"
+    writeTimeout: "30s"
+
+  backoffice:
+    host: office-service-server.rgs-core.svc.cluster.local
+    port: 7400
     isSecure: false
-  
+
   overlord:
-    host: overlord.rgs-core.svc.cluster.local
-    port: 7510
-    isSecure: false
-  
-  pfr:
-    host: pfr.rgs-core.svc.cluster.local
-    port: 7610
+    host: overlord-service.rgs-core.svc.cluster.local
+    port: 7500
     isSecure: false
 
-# Database configuration
-database:
-  host: postgresql.rgs-infrastructure.svc.cluster.local
-  port: 5432
-  name: launch
-  connectionTimeout: "300s"
-  compression: "zlib"
-  pingInterval: "30s"
-  minConnections: 10
-  maxConnections: 50
+  launch:
+    baseURL: "https://dev-h3-games.ninjagaming.com/"
+    bfBaseURL: "https://dev-h3-games.ninjagaming.com/"
+    gamehubBaseURL: "https://dev-h3-games.ninjagaming.com/"
+    format: "%v%v/?user_id=%v&integrator=%s&jurisdiction=UA&currency=%s&user_locale=%s"
 
-# Redis configuration
-redis:
-  host: redis-master.rgs-infrastructure.svc.cluster.local
-  port: 6379
-  basePrefix: svc.launch
+  bf:
+    baseURL: "https://localhost/"
+    bfBaseURL: "https://localhost/"
+    apiKey: "no-key"
 
-# RabbitMQ configuration
-rabbitmq:
-  host: rabbitmq.rgs-infrastructure.svc.cluster.local
-  port: 5672
+  reish:
+    baseURL: "https://localhost/"
+    apiKey: "no-key"
+
+  tracer:
+    disabled: true
+    url: http://jaeger-collector.monitoring.svc.cluster.local:14268/api/traces
+    serviceName: launch
+
+  logger:
+    logLevel: error
+
+# Integrators configuration
+integrators:
+  direct:
+    mockdirect:
+      apiKey: testtest11
+      apiSecret: superSecret
+      url: https://example.com
+      withLogs: true
+  daintree:
+    apiKey: 3c29ada8-1324-46ac-9e25-19c890608fa4
+    apiSecret: rfbTb2XMFQ
+  ninjagaming_lb:
+    apiKey: f510fd05-26dd-4412-856f-01ac42a79a8b
+    apiSecret: AlOGYrOunT
+  fixbet:
+    apiKey: c37f591b-d0fb-4049-80b7-ca4ced8699ab
+    apiSecret: T5fUaWPFzg
+  kralbet:
+    apiKey: dfd7794f-30a7-49b3-b1bd-b6f483b94fca
+    apiSecret: B0XODR37Bn
+  mariobet:
+    apiKey: 79559bbf-fc9d-4f9b-96d6-2091b92f0039
+    apiSecret: MbHCc4nuQv
+  mock: null
+  onwin:
+    apiKey: 6ddbd296-a7a4-4e22-912c-1908edc7b074
+    apiSecret: QxstwVPzw5
+  tarafbet:
+    apiKey: 9bf30992-0df2-4953-961d-9fb239b80ae2
+    apiSecret: 3AqEQ7Xsdy
+  xax:
+    apiKey: 2bd0eafc-33a8-41be-8e51-e33345224c16
+    apiSecret: SVecgTjCFt
+  xslot:
+    apiKey: fedef656-84c7-4727-83cd-d66732e6e31e
+    apiSecret: o8xWGnhWm8
+  betine:
+    apiKey: bdd30550-7f17-453f-b753-f3aaec5d6ee5
+    apiSecret: 9gS3mNr245
+  betkom:
+    apiKey: 99f2914e-bd38-411f-a61a-3b21e8965831
+    apiSecret: c2jH25Z36j
+  supertotobet:
+    apiKey: 0c7875a6-20b0-4118-8a58-35b44eb6cb87
+    apiSecret: 2Pjf7zb18j
+  betmatik:
+    apiKey: 2d3fe889-e2c7-48d7-bbba-1e1c431ba349
+    apiSecret: M96Ob3t0uc
+  bayspin:
+    apiKey: f9e2fb91-9bd9-4349-a4d1-e371f3a77f91
+    apiSecret: 7720DBt6ls
+  sahabet:
+    apiKey: 70c56982-41f9-400a-979c-3f72c45466a5
+    apiSecret: 9P637G77Cv
+  matadorbet:
+    apiKey: f866c08d-48d9-4436-9fd7-46ae4e30a512
+    apiSecret: LAjzIFZ001
+  betturkey:
+    apiKey: ffcfeeeb-75a1-4441-871a-1b69970755ea
+    apiSecret: GryJz632Ca
+  zbahis:
+    apiKey: 1a99769a-9b50-4e64-ae24-faa8a161b529
+    apiSecret: 9L54Ih8rvm
+
+# Providers configuration
+providers:
+  ninjagaming:
+    baseURL: "https://dev-h3-games.ninjagaming.com/"
 
 # Health checks
 livenessProbe:
@@ -132,23 +177,19 @@ livenessProbe:
     port: http
   initialDelaySeconds: 30
   periodSeconds: 10
-  timeoutSeconds: 5
-  failureThreshold: 3
+  timeoutSeconds: 10
+  failureThreshold: 5
 
 readinessProbe:
   httpGet:
     path: /health
     port: http
   initialDelaySeconds: 10
-  periodSeconds: 5
-  timeoutSeconds: 3
-  failureThreshold: 3
+  periodSeconds: 10
+  timeoutSeconds: 10
+  failureThreshold: 5
 
 # Pod Disruption Budget
 podDisruptionBudget:
-  enabled: true
-  minAvailable: 1
-
-# Network Policy
-networkPolicy:
   enabled: false
+  minAvailable: 1
