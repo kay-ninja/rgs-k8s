@@ -38,7 +38,6 @@ helm.sh/chart: {{ include "pfr.chart" . }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
-app: pfr
 {{- end }}
 
 {{/*
