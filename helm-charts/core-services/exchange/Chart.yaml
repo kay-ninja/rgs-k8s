@@ -1,15 +1,15 @@
 apiVersion: v2
 name: exchange
-description: RGS Exchange Service - Currency and wallet management
+description: RGS Exchange Service - Currency exchange service
 type: application
 version: 1.0.0
-appVersion: "1.0.52"
+appVersion: "1.0.21"
 keywords:
   - rgs
   - exchange
-  - wallet
+  - currency
   - core-service
-home:  https://github.com/kay-ninja/rgs-k8s
+home: https://github.com/your-repo/rgs-k8s
 maintainers:
   - name: Platform Team
-    email: kayode@ninjagaming.com
+    email: your-email@example.com
