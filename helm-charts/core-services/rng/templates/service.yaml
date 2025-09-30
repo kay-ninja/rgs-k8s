@@ -1,40 +1,33 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "rng.fullname" . }}
+  name: {{ include "rng.fullname" . }}-grpc
   labels:
     {{- include "rng.labels" . | nindent 4 }}
+    service-type: grpc
 spec:
   type: {{ .Values.service.type }}
   ports:
-  - port: {{ .Values.service.grpcPort }}
-    targetPort: grpc
-    protocol: TCP
-    name: grpc
-  - port: {{ .Values.service.httpPort }}
-    targetPort: http
-    protocol: TCP
-    name: http
+    - port: {{ .Values.service.grpc.port }}
+      targetPort: grpc
+      protocol: TCP
+      name: grpc
   selector:
     {{- include "rng.selectorLabels" . | nindent 4 }}
 ---
-# Headless service for internal communication
 apiVersion: v1
 kind: Service
 metadata:
-  name: rng
+  name: {{ include "rng.fullname" . }}-http
   labels:
     {{- include "rng.labels" . | nindent 4 }}
+    service-type: http
 spec:
-  type: ClusterIP
+  type: {{ .Values.service.type }}
   ports:
-  - port: {{ .Values.service.httpPort }}
-    targetPort: http
-    protocol: TCP
-    name: http
-  - port: {{ .Values.service.grpcPort }}
-    targetPort: grpc
-    protocol: TCP
-    name: grpc
+    - port: {{ .Values.service.http.port }}
+      targetPort: http
+      protocol: TCP
+      name: http
   selector:
     {{- include "rng.selectorLabels" . | nindent 4 }}

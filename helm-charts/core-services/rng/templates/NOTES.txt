@@ -1,0 +1,22 @@
+RNG Service has been deployed!
+
+1. Get the application URLs by running these commands:
+
+  gRPC Service:
+  kubectl port-forward svc/{{ include "rng.fullname" . }}-grpc {{ .Values.service.grpc.port }}:{{ .Values.service.grpc.port }} -n {{ .Release.Namespace }}
+
+  HTTP Service:
+  kubectl port-forward svc/{{ include "rng.fullname" . }}-http {{ .Values.service.http.port }}:{{ .Values.service.http.port }} -n {{ .Release.Namespace }}
+
+2. Check the service status:
+  kubectl get pods -l "app.kubernetes.io/name={{ include "rng.name" . }},app.kubernetes.io/instance={{ .Release.Name }}" -n {{ .Release.Namespace }}
+
+3. View logs:
+  kubectl logs -f deployment/{{ include "rng.fullname" . }} -n {{ .Release.Namespace }}
+
+4. Health check:
+  kubectl exec -it deployment/{{ include "rng.fullname" . }} -n {{ .Release.Namespace }} -- wget -qO- localhost:7710/health
+
+Service Endpoints (within cluster):
+  gRPC: {{ include "rng.fullname" . }}-grpc.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.service.grpc.port }}
+  HTTP: {{ include "rng.fullname" . }}-http.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.service.http.port }}
