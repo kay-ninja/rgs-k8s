@@ -1,5 +1,5 @@
 # Default values for overlord service
-replicaCount: 2
+replicaCount: 1
 
 image:
   repository: registry.ejaw.net/rgs/backend/core/overlord
