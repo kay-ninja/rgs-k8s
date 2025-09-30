@@ -1,10 +1,9 @@
 # Default values for adaptor service
-replicaCount: 2
+replicaCount: 1
 
 image:
-  registry: rg.fr-par.scw.cloud
-  repository: ejaw/adaptor
-  tag: "1.0.30"
+  repository: ninjargs/proga-adaptor
+  tag: "3.0.5"
   pullPolicy: IfNotPresent
 
 imagePullSecrets:
@@ -19,25 +18,27 @@ serviceAccount:
   name: ""
 
 podAnnotations:
-  sidecar.istio.io/inject: "false"  # Minimal Istio
+  sidecar.istio.io/inject: "false"
   prometheus.io/scrape: "true"
   prometheus.io/port: "7010"
 
 podSecurityContext:
-  runAsNonRoot: true
-  runAsUser: 1000
-  fsGroup: 1000
+  runAsNonRoot: false
+  runAsUser: 0
+  fsGroup: 0
 
 securityContext:
+  privileged: true
+  allowPrivilegeEscalation: true
+  runAsUser: 0
+  runAsNonRoot: false
   capabilities:
-    drop:
+    add:
     - ALL
   readOnlyRootFilesystem: false
-  allowPrivilegeEscalation: false
 
 service:
   type: ClusterIP
-  grpcPort: 7000
   httpPort: 7010
   annotations: {}
 
@@ -46,68 +47,248 @@ resources:
     cpu: 500m
     memory: 512Mi
   requests:
-    cpu: 200m
+    cpu: 100m
     memory: 256Mi
 
 autoscaling:
   enabled: false
-  minReplicas: 2
+  minReplicas: 1
   maxReplicas: 10
   targetCPUUtilizationPercentage: 70
 
 nodeSelector: {}
 tolerations: []
-
-affinity:
-  podAntiAffinity:
-    preferredDuringSchedulingIgnoredDuringExecution:
-    - weight: 100
-      podAffinityTerm:
-        labelSelector:
-          matchExpressions:
-          - key: app
-            operator: In
-            values:
-            - adaptor
-        topologyKey: kubernetes.io/hostname
+affinity: {}
 
 # Application Configuration
 config:
   env: production
   logLevel: info
-  
-  server:
-    host: "0.0.0.0"
-    port: 7010
-    readTimeout: "300s"
-    writeTimeout: "300s"
-  
-  rpc:
-    host: "0.0.0.0"
-    port: 7000
-    maxProcessingTime: 300000
+  wagerSet:
+    - 100
+    - 200
+    - 300
+    - 400
+    - 500
+    - 600
+    - 700
+    - 800
+    - 900
+    - 1000
+    - 1200
+    - 1600
+    - 2000
+    - 2400
+    - 2800
+    - 3200
+    - 3600
+    - 4000
+    - 6000
+    - 8000
+    - 10000
+    - 12000
+    - 14000
+    - 16000
+    - 18000
+    - 20000
+    - 30000
+    - 40000
+    - 50000
+    - 60000
+    - 70000
+    - 80000
+    - 90000
+    - 100000
+    - 120000
+    - 140000
+    - 160000
+    - 180000
+    - 200000
+    - 240000
+    - 280000
+    - 320000
+    - 360000
+    - 400000
+    - 480000
+    - 560000
+    - 600000
+    - 640000
+    - 720000
+    - 800000
+    - 1000000
+    - 1200000
+    - 1400000
+    - 1600000
+    - 1800000
+    - 2000000
 
-# Database configuration
-database:
-  host: postgresql.rgs-infrastructure.svc.cluster.local
-  port: 5432
-  name: adaptor
-  connectionTimeout: "300s"
-  compression: "zlib"
-  pingInterval: "30s"
-  minConnections: 10
-  maxConnections: 50
+# Engine configuration
+engine:
+  rtp: 96
+  debug: false  # Set to false for production
+  isCheatsAvailable: false
+  mockRng: false  # Set to false for production
+  volatility: medium
+
+# Service dependencies
+services:
+  overlord:
+    host: overlord-service.rgs-core.svc.cluster.local
+    port: 7500
+    isSecure: false
+  history:
+    host: history-service-server.rgs-core.svc.cluster.local
+    port: 7200
+    isSecure: false
+  rng:
+    host: rng-service.rgs-core.svc.cluster.local
+    port: 7700
 
 # Redis configuration
 redis:
   host: redis-master.rgs-infrastructure.svc.cluster.local
   port: 6379
-  basePrefix: svc.adaptor
+  database: 1
+  password: ""  # No auth as per your setup
+  prefix: "indian-adaptor:service"
 
-# RabbitMQ configuration
-rabbitmq:
-  host: rabbitmq.rgs-infrastructure.svc.cluster.local
-  port: 5672
+# MySQL configuration
+mysql:
+  host: 77.93.172.66
+  port: 3306
+  database: gamelog
+  user: root
+  password: "3f~qUvst6s25zS>i$4"
+
+# Game configuration
+games:
+  availableGames:
+    - betturkeybox1000
+    - dede-1000
+    - dede5000
+    - sugar-box-1000-valentines
+    - sugarbox
+    - sugarbox1000
+    - super-dede-5000
+    - super-toto-box-1000
+    - shadow-ninja
+    - gold-tooth-pirate
+    - betturkey-dede-5000
+    - dede
+    - magic-princess-5000
+    - aztec-hero
+    - toro-de-oro
+    - tipobet-sugar-box-1000
+    - tipobet-dede-5000
+    - magic-princess-1000
+    - magic-princess
+    - gates-of-ninja
+    - ocean-fish
+    - onwin-sugar-box-1000
+    - onwin-dede-5000
+    - matador-sugar-box-1000
+    - kralbet-sugar-box-1000
+    - sahabet-sugar-box-1000
+    - fixbet-sugar-box-1000
+    - otobet-sugar-box-1000
+    - xslot-sugar-box-1000
+    - baseball-crash
+    - danger-zone
+    - cash-bandicoot
+    - betist-dede-5000
+    - mariobet-dede-5000
+    - zlot-dede-5000
+    - bahis-dede-5000
+    - fixbet-dede-5000
+    - matadorbet-dede-5000
+    - strike-zone
+    - bycasino-dede-5000
+    - bycasino-sugar-box-1000
+    - sahabet-dede-5000
+    - starzbet-sugar-box-1000
+    - kralbet-dede-5000
+    - jungle-king
+    - supertoto-dede-5000
+    - xslot-dede-5000
+    - dede5000T
+    - starzbet-dede-5000
+    - otobet-dede-5000
+    - solobet-dede-5000
+    - solobet-sugar-box-1000
+    - wonder-bonanza-1000
+    - fruitnite
+    - crazy-farm
+    - magic-princess-pachi
+    - multiwin-dede-5000
+    - shoot-to-win
+    - multiwin-sugar-box-1000
+    
+  gameMapping:
+    betturkeybox1000: "betturkeybox1000"
+    dede-1000: "dede1000"
+    dede5000: "dede5000"
+    sugar-box-1000-valentines: "sugarbox1000Valentines"
+    sugarbox: "sugarbox"
+    sugarbox1000: "sugarbox1000"
+    super-dede-5000: "superdede5000"
+    super-toto-box-1000: "supertotobox1000"
+    shadow-ninja: "shadowninja"
+    gold-tooth-pirate: "goldtoothpirate"
+    betturkey-dede-5000: "betturkey-dede-5000"
+    dede: "dede"
+    magic-princess-5000: "magicprincess5000"
+    aztec-hero: "aztechero"
+    toro-de-oro: "torodeoro"
+    tipobet-sugar-box-1000: "tipobet-sugar-box-1000"
+    tipobet-dede-5000: "tipobet-dede-5000"
+    magic-princess-1000: "magicprincess1000"
+    magic-princess: "magicprincess"
+    gates-of-ninja: "gatesofninja"
+    ocean-fish: "oceanfish"
+    onwin-sugar-box-1000: "onwin-sugar-box-1000"
+    onwin-dede-5000: "onwin-dede-5000"
+    matador-sugar-box-1000: "matador-sugar-box-1000"
+    kralbet-sugar-box-1000: "kralbet-sugar-box-1000"
+    sahabet-sugar-box-1000: "sahabet-sugar-box-1000"
+    fixbet-sugar-box-1000: "fixbet-sugar-box-1000"
+    otobet-sugar-box-1000: "otobet-sugar-box-1000"
+    xslot-sugar-box-1000: "xslot-sugar-box-1000"
+    baseball-crash: "baseball-crash"
+    danger-zone: "danger-zone"
+    cash-bandicoot: "cashbandicoot"
+    betist-dede-5000: "betist-dede-5000"
+    zlot-dede-5000: "zlot-dede-5000"
+    mariobet-dede-5000: "mariobet-dede-5000"
+    bahis-dede-5000: "bahis-dede-5000"
+    fixbet-dede-5000: "fixbet-dede-5000"
+    matadorbet-dede-5000: "matadorbet-dede-5000"
+    strike-zone: "strikezone"
+    bycasino-dede-5000: "bycasino-dede-5000"
+    bycasino-sugar-box-1000: "bycasino-sugar-box-1000"
+    sahabet-dede-5000: "sahabet-dede-5000"
+    starzbet-sugar-box-1000: "starzbet-sugar-box-1000"
+    kralbet-dede-5000: "kralbet-dede-5000"
+    jungle-king: "jungleking"
+    supertoto-dede-5000: "supertoto-dede-5000"
+    xslot-dede-5000: "xslot-dede-5000"
+    dede5000T: "dede5000T"
+    starzbet-dede-5000: "starzbet-dede-5000"
+    otobet-dede-5000: "otobet-dede-5000"
+    solobet-dede-5000: "solobet-dede-5000"
+    solobet-sugar-box-1000: "solobet-sugarbox-1000"
+    wonder-bonanza-1000: "wonder-bonanza-1000"
+    fruitnite: "fruitnite"
+    crazy-farm: "crazy-farm"
+    magic-princess-pachi: "magic-princess-pachi"
+    multiwin-dede-5000: "multiwin-dede-5000"
+    shoot-to-win: "shoot-to-win"
+    multiwin-sugar-box-1000: "multiwin-sugar-box-1000"
+
+# Tracer configuration
+tracer:
+  disabled: true  # Enable in production with proper endpoint
+  url: http://jaeger-collector.monitoring.svc.cluster.local:14268/api/traces
+  serviceName: indian-adaptor
 
 # Health checks
 livenessProbe:
@@ -116,23 +297,14 @@ livenessProbe:
     port: http
   initialDelaySeconds: 30
   periodSeconds: 10
-  timeoutSeconds: 5
-  failureThreshold: 3
+  timeoutSeconds: 10
+  failureThreshold: 5
 
 readinessProbe:
   httpGet:
     path: /health
     port: http
   initialDelaySeconds: 10
-  periodSeconds: 5
-  timeoutSeconds: 3
-  failureThreshold: 3
-
-# Pod Disruption Budget
-podDisruptionBudget:
-  enabled: true
-  minAvailable: 1
-
-# Network Policy
-networkPolicy:
-  enabled: false
+  periodSeconds: 10
+  timeoutSeconds: 10
+  failureThreshold: 5

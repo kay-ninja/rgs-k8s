@@ -1,5 +1,5 @@
 # Default values for office service
-replicaCount: 2
+replicaCount: 1
 
 # Server component (backoffice-server)
 server:
