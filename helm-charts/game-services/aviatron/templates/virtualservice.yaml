@@ -22,7 +22,7 @@ spec:
         host: {{ .Release.Name }}-server
         port:
           number: {{ .Values.server.port }}
-    timeout: 0s  # No timeout for WebSocket connections
+    timeout: 3600s  # Changed from 0s to 1 hour for WebSocket
     retries:
       attempts: 2
       perTryTimeout: 10s
