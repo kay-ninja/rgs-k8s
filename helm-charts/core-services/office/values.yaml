@@ -161,7 +161,7 @@ rabbitmq:
   host: rabbitmq.rgs-infrastructure.svc.cluster.local
   port: 5672
   username: user
-  password: 4rRFjkrd4IP0oy4KW5c9h3ND4OZxO90/FEr6Uz9iRgw=  # Move to secret in production
+  password: wuT9aphi  # Move to secret in production
 
 # Mailgun configuration
 mailgun:
