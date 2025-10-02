@@ -82,8 +82,9 @@ autoscaling:
 volumes: []
 volumeMounts: []
 
-nodeSelector: {}
-
+nodeSelector:
+  workload: core-services
+  
 tolerations: []
 
 affinity: {}

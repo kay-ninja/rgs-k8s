@@ -92,7 +92,9 @@ volumeMounts:
   - name: dshm
     mountPath: /dev/shm
 
-nodeSelector: {}
+nodeSelector:
+  workload: core-services
+
 
 tolerations: []
 
