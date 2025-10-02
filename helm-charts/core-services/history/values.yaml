@@ -122,7 +122,7 @@ config:
   redis:
     host: redis-master.rgs-infrastructure.svc.cluster.local
     port: 6379
-    pass: "ninja-admin"
+    pass: ""
     prefix: "svc.history-service"
 
   tracer:
