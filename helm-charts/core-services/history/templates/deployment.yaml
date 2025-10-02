@@ -94,10 +94,6 @@ spec:
         emptyDir:
           medium: Memory
           sizeLimit: {{ .Values.shmSize }}
-      - name: shm
-        emptyDir:
-          medium: Memory
-          sizeLimit: {{ .Values.shmSize }}
       {{- with .Values.volumes }}
       {{- toYaml . | nindent 6 }}
       {{- end }}
