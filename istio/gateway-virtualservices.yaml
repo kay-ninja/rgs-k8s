@@ -13,9 +13,8 @@ spec:
       name: http
       protocol: HTTP
     hosts:
-    - "*.rgs.yourdomain.com"
-    - "rgs.yourdomain.com"
-    # Redirect to HTTPS
+    - "dev-h3-games.ninjagaming.com"
+    - "dev-h3-backoffice.ninjagaming.com"
     tls:
       httpsRedirect: false
   - port:
@@ -23,57 +22,21 @@ spec:
       name: https
       protocol: HTTPS
     hosts:
-    - "dev-h3-games.ninjagaming.com"  #"*.rgs.yourdomain.com"
-    - "dev-h3-backoffice.ninjagaming.com" #"rgs.yourdomain.com"
+    - "dev-h3-games.ninjagaming.com"
+    - "dev-h3-backoffice.ninjagaming.com"
     tls:
       mode: SIMPLE
-      credentialName: rgs-tls-cert # Created via cert-manager
+      credentialName: rgs-tls-cert
 ---
-# VirtualService for Backoffice UI
+# VirtualService for Backoffice (UI + Core Services)
 apiVersion: networking.istio.io/v1beta1
 kind: VirtualService
 metadata:
-  name: backoffice-ui
+  name: backoffice-all
   namespace: rgs-core
 spec:
   hosts:
-  - "dev-h3-backoffice.ninjagaming.com" #"admin.rgs.yourdomain.com"
-  gateways:
-  - istio-system/rgs-gateway
-  http:
-  - match:
-    - uri:
-        prefix: "/api"
-    route:
-    - destination:
-        host: office-server
-        port:
-          number: 7410
-      weight: 100
-    timeout: 30s
-    retries:
-      attempts: 3
-      perTryTimeout: 10s
-      retryOn: gateway-error,connect-failure,refused-stream
-  - match:
-    - uri:
-        prefix: "/"
-    route:
-    - destination:
-        host: office-client
-        port:
-          number: 80
-      weight: 100
----
-# VirtualService for Core Services API
-apiVersion: networking.istio.io/v1beta1
-kind: VirtualService
-metadata:
-  name: core-services-api
-  namespace: rgs-core
-spec:
-  hosts:
-  - "dev-h3-backoffice.ninjagaming.com" #"api.rgs.yourdomain.com"
+  - "dev-h3-backoffice.ninjagaming.com"
   gateways:
   - istio-system/rgs-gateway
   http:
@@ -125,95 +88,31 @@ spec:
         port:
           number: 7010
       weight: 100
----
-# VirtualService for Games
-apiVersion: networking.istio.io/v1beta1
-kind: VirtualService
-metadata:
-  name: games-routing
-  namespace: rgs-games
-spec:
-  hosts:
-  - "dev-h3-games.ninjagaming.com" #"games.rgs.yourdomain.com"
-  gateways:
-  - istio-system/rgs-gateway
-  http:
-  # Generate these programmatically for 90+ games
-  # Example for a few games:
-  
-  # Delicious Bonanza
+  # Office Server API
   - match:
     - uri:
-        prefix: "/delicious-bonanza/api/"
-    rewrite:
-      uri: "/"
+        prefix: "/api"
     route:
     - destination:
-        host: delicious-bonanza-server
+        host: office-service-server
         port:
-          number: 8000
+          number: 7410
+      weight: 100
     timeout: 30s
     retries:
-      attempts: 2
+      attempts: 3
       perTryTimeout: 10s
+      retryOn: gateway-error,connect-failure,refused-stream
+  # Office Client (catch-all, must be last)
   - match:
     - uri:
-        prefix: "/delicious-bonanza/"
-    rewrite:
-      uri: "/"
+        prefix: "/"
     route:
     - destination:
-        host: delicious-bonanza-client
+        host: office-service-client
         port:
           number: 80
-  
-  # Paper Toss (WebSocket game)
-  - match:
-    - uri:
-        prefix: "/paper-toss/api/"
-    rewrite:
-      uri: "/"
-    route:
-    - destination:
-        host: paper-toss-server
-        port:
-          number: 8000
-    websocketUpgrade: true
-    timeout: 0s # No timeout for WebSocket
-  - match:
-    - uri:
-        prefix: "/paper-toss/"
-    rewrite:
-      uri: "/"
-    route:
-    - destination:
-        host: paper-toss-client
-        port:
-          number: 80
-  
-  # Aviatron (WebSocket game)
-  - match:
-    - uri:
-        prefix: "/aviatron/api/"
-    rewrite:
-      uri: "/"
-    route:
-    - destination:
-        host: aviatron-server
-        port:
-          number: 8000
-    websocketUpgrade: true
-    timeout: 0s
-  - match:
-    - uri:
-        prefix: "/aviatron/"
-    rewrite:
-      uri: "/"
-    route:
-    - destination:
-        host: aviatron-client
-        port:
-          number: 80
+      weight: 100
 ---
 # DestinationRule for Core Services with Circuit Breaker
 apiVersion: networking.istio.io/v1beta1
@@ -231,7 +130,7 @@ spec:
         http1MaxPendingRequests: 100
         http2MaxRequests: 100
         maxRequestsPerConnection: 1
-        h2UpgradePolicy: UPGRADE # Automatically upgrade to HTTP/2
+        h2UpgradePolicy: UPGRADE
     outlierDetection:
       consecutive5xxErrors: 5
       interval: 30s
@@ -240,7 +139,7 @@ spec:
       minHealthPercent: 30
       splitExternalLocalOriginErrors: true
     loadBalancer:
-      simple: LEAST_REQUEST # Better than round-robin
+      simple: LEAST_REQUEST
   subsets:
   - name: v1
     labels:
@@ -249,33 +148,6 @@ spec:
       connectionPool:
         tcp:
           maxConnections: 100
----
-# DestinationRule for Game Services
-apiVersion: networking.istio.io/v1beta1
-kind: DestinationRule
-metadata:
-  name: game-services-destination
-  namespace: rgs-games
-spec:
-  host: "*.rgs-games.svc.cluster.local"
-  trafficPolicy:
-    connectionPool:
-      tcp:
-        maxConnections: 50
-      http:
-        http1MaxPendingRequests: 50
-        http2MaxRequests: 100
-        maxRequestsPerConnection: 2
-    outlierDetection:
-      consecutiveGatewayErrors: 5
-      interval: 30s
-      baseEjectionTime: 30s
-      maxEjectionPercent: 50
-    loadBalancer:
-      consistentHash:
-        httpCookie:
-          name: "game-session"
-          ttl: 3600s
 ---
 # ServiceEntry for External Services (if needed)
 apiVersion: networking.istio.io/v1beta1
@@ -338,49 +210,6 @@ spec:
     jwksUri: "https://auth.yourdomain.com/.well-known/jwks.json"
     audiences:
     - "rgs-platform"
----
-# Telemetry Configuration
-apiVersion: telemetry.istio.io/v1alpha1
-kind: Telemetry
-metadata:
-  name: otel-metrics
-  namespace: istio-system
-spec:
-  metrics:
-  - providers:
-    - name: otel
-    dimensions:
-      request_protocol: request.protocol
-      response_code: response.code | "unknown"
----
-# Traffic Shifting for Canary Deployments
-apiVersion: networking.istio.io/v1beta1
-kind: VirtualService
-metadata:
-  name: canary-example
-  namespace: rgs-games
-spec:
-  hosts:
-  - delicious-bonanza-server
-  http:
-  - match:
-    - headers:
-        canary:
-          exact: "true"
-    route:
-    - destination:
-        host: delicious-bonanza-server
-        subset: canary
-      weight: 100
-  - route:
-    - destination:
-        host: delicious-bonanza-server
-        subset: stable
-      weight: 90
-    - destination:
-        host: delicious-bonanza-server
-        subset: canary
-      weight: 10
 ---
 # Retry Policy for Critical Services
 apiVersion: networking.istio.io/v1beta1
