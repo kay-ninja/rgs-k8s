@@ -1,9 +1,8 @@
-# RGS Platform Kubernetes Migration Kit
+# RGS Platform Kubernetes Applications
 
 ## Overview
-Complete migration toolkit for moving the RGS Gaming Platform from Docker Compose to Kubernetes with Istio service mesh and ArgoCD GitOps.
+RGS Gaming Platform for Kubernetes with Istio service mesh and ArgoCD GitOps.
 
-## Migration Architecture
 
 ### Target Stack
 - **Kubernetes**: Container orchestration (Hetzner Cloud)
