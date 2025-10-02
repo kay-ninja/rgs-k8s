@@ -1,0 +1,40 @@
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: {{ .Release.Name }}-routes
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ .Release.Name }}
+spec:
+  hosts:
+  - "dev-h3-games.ninjagaming.com"
+  gateways:
+  - istio-system/rgs-gateway
+  http:
+  # Server API route (supports WebSocket)
+  - match:
+    - uri:
+        prefix: "/{{ .Values.gameSlug }}/api/"
+    rewrite:
+      uri: "/"
+    route:
+    - destination:
+        host: {{ .Release.Name }}-server
+        port:
+          number: {{ .Values.server.port }}
+    timeout: 0s  # No timeout for WebSocket connections
+    retries:
+      attempts: 2
+      perTryTimeout: 10s
+      retryOn: gateway-error,connect-failure,refused-stream
+  # Client route
+  - match:
+    - uri:
+        prefix: "/{{ .Values.gameSlug }}/"
+    rewrite:
+      uri: "/"
+    route:
+    - destination:
+        host: {{ .Release.Name }}-client
+        port:
+          number: {{ .Values.client.port }}

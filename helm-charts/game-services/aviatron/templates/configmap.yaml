@@ -1,0 +1,78 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-config
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ .Release.Name }}
+data:
+  config.yaml: |
+    server:
+      env: {{ .Values.config.server.env }}
+      maxWin: {{ .Values.config.server.maxWin }}
+      host: {{ .Values.config.server.host }}
+      port: {{ .Values.config.server.port }}
+      readTimeout: {{ .Values.config.server.readTimeout }}
+      writeTimeout: {{ .Values.config.server.writeTimeout }}
+      maxProcessingTime: {{ .Values.config.server.maxProcessingTime }}
+
+    websocket:
+      maxProcessingTime: {{ .Values.config.websocket.maxProcessingTime }}
+      readBufferSize: {{ .Values.config.websocket.readBufferSize }}
+      writeBufferSize: {{ .Values.config.websocket.writeBufferSize }}
+
+    overlord:
+      host: {{ .Values.config.overlord.host }}
+      port: {{ .Values.config.overlord.port }}
+      isSecure: {{ .Values.config.overlord.isSecure }}
+
+    history:
+      host: {{ .Values.config.history.host }}
+      port: {{ .Values.config.history.port }}
+      isSecure: {{ .Values.config.history.isSecure }}
+
+    rng:
+      host: {{ .Values.config.rng.host }}
+      port: {{ .Values.config.rng.port }}
+      maxProcessingTime: {{ .Values.config.rng.maxProcessingTime }}
+
+    redis:
+      host: {{ .Values.config.redis.host }}
+      port: {{ .Values.config.redis.port }}
+      pass: {{ .Values.config.redis.pass }}
+      prefix: {{ .Values.config.redis.prefix }}
+
+    fly:
+      step:
+{{- range $key, $value := .Values.config.fly.step }}
+        {{ $key }}: {{ $value }}
+{{- end }}
+      incrementSpeed:
+{{- range $key, $value := .Values.config.fly.incrementSpeed }}
+        {{ $key }}: {{ $value }}
+{{- end }}
+      incrementSpeedElse: {{ .Values.config.fly.incrementSpeedElse }}
+      stepElse: {{ .Values.config.fly.stepElse }}
+      timeForWager: {{ .Values.config.fly.timeForWager }}
+
+    game:
+      minCoefficient: {{ .Values.config.game.minCoefficient }}
+      availableGames:
+{{- range .Values.config.game.availableGames }}
+        - {{ . }}
+{{- end }}
+      availableIntegrators:
+{{- range .Values.config.game.availableIntegrators }}
+        - {{ . }}
+{{- end }}
+
+    bot:
+      amount: {{ toJson .Values.config.bot.amount }}
+      wagers:
+{{- range $key, $value := .Values.config.bot.wagers }}
+        {{ $key }}: {{ toJson $value }}
+{{- end }}
+      names:
+{{- range .Values.config.bot.names }}
+        - {{ . }}
+{{- end }}
