@@ -91,7 +91,9 @@ spec:
   # Office Server API
   - match:
     - uri:
-        prefix: "/api"
+        prefix: "/api/"
+    rewrite:
+      uri: "/"  # ADD THIS - strips /api prefix
     route:
     - destination:
         host: office-service-server
