@@ -163,7 +163,15 @@ spec:
           periodSeconds: 5
         resources:
           {{- toYaml .Values.resources.client | nindent 12 }}
-        volumeMounts: []
-      volumes: []
+        volumeMounts: 
+          - name: cache
+            mountPath: /var/cache/nginx
+          - name: run
+            mountPath: /var/run
+      volumes:
+        - name: cache
+          emptyDir: {}
+        - name: run
+          emptyDir: {}
       
 {{- end }}
