@@ -124,17 +124,17 @@ config:
   
   # Service dependencies - Updated to use Kubernetes service discovery
   history:
-    host: history-service-server.rgs-core.svc.cluster.local
+    host: history-service.rgs-core.svc.cluster.local
     port: 7200
     isSecure: false
   
   overlord:
-    host: overlord-service-server.rgs-core.svc.cluster.local
+    host: overlord-service.rgs-core.svc.cluster.local
     port: 7500
     isSecure: false
   
   exchange:
-    host: exchange-service-server.rgs-core.svc.cluster.local
+    host: exchange-service.rgs-core.svc.cluster.local
     port: 7100
     isSecure: false
 
