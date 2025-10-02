@@ -130,7 +130,7 @@ spec:
         http1MaxPendingRequests: 100
         http2MaxRequests: 100
         maxRequestsPerConnection: 1
-        h2UpgradePolicy: UPGRADE
+        h2UpgradePolicy: DO_NOT_UPGRADE
     outlierDetection:
       consecutive5xxErrors: 5
       interval: 30s
