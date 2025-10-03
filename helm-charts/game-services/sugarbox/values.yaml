@@ -19,7 +19,7 @@ client:
     repository: sugarbox-client
     tag: "4.0.17-go-server"
     pullPolicy: IfNotPresent
-  port: 80
+  port: 8089
 
 service:
   type: ClusterIP
