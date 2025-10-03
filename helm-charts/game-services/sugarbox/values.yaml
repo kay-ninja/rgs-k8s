@@ -17,7 +17,7 @@ client:
   image:
     registry: ninjargs
     repository: sugarbox-client
-    tag: "4.0.17-go-server"
+    tag: "develop-4.0.24"
     pullPolicy: IfNotPresent
   port: 8089
 
