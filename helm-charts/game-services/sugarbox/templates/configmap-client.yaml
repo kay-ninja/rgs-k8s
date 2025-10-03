@@ -1,0 +1,60 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-client-config
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ .Release.Name }}
+data:
+  addon.js: |
+    // this variable delcared in config.js in root games folder
+    var gameEnginePath = gameEnginePath ? gameEnginePath : "/";
+    commonConfig["serverIP"] = "{{ .Values.clientConfig.serverIP }}";
+    var siteCode = "{{ .Values.clientConfig.siteCode }}";
+
+    var networkCode = "";
+    var isGermanUI = false;
+
+    if (siteCode === "xyzxyz") {
+      isGermanUI = true;
+    }
+
+    if (getUrlVar('super_meter_enabled') == 1) {
+      isGermanUI = true;
+    }
+
+    if (siteCode) networkCode = siteCode.slice(2, 5);
+
+    var gameURL = new URL(window.location.href);
+    // These are not actual URLs, these are just to check if some URL is set or not
+    // If not, disable/hide home and deposit button respectively
+    // Actual URL set is there in coreApp => setURLs()
+    var lobbyURLTest = gameURL.searchParams.get("lobby_url");;
+    var depositURLTest = gameURL.searchParams.get("deposit_url");
+    var _amountType = gameURL.searchParams.get("amount_type") || "1";
+    var _isDemoMode = (_amountType === "4") ? true : false;
+    //Matrix: Show operator erros
+    //Dench: Don't show operator errors
+    //Default: Don't show operator errors
+    //Used In: ErrorController.js => onError()
+    // commonConfig["isSuperMeter"] = false;
+
+    commonConfig["serverURL"] = "/game/ask-server";
+
+    switch (networkCode) {
+      default:
+        break;
+    }
+    if (_isDemoMode) {
+      commonConfig["hideHistoryButton"] = true;
+    }
+
+    commonConfig["lobbyURL"] = commonConfig["serverIP"] + "/games/lobby";
+    commonConfig["logsPath"] = "{{ .Values.clientConfig.logsPath }}";
+
+    commonConfig["noSwipeUp"] = false;
+
+    if (lobbyURLTest == undefined || lobbyURLTest == "" || lobbyURLTest == "None") {
+      commonConfig["hideHomeButtonInDesktop"] = true;
+      commonConfig["hideHomeButtonMobile"] = true;
+    }
