@@ -7,10 +7,9 @@ metadata:
     app: {{ .Release.Name }}
 data:
   addon.js: |
-    // this variable delcared in config.js in root games folder
     var gameEnginePath = gameEnginePath ? gameEnginePath : "/";
-    commonConfig["serverIP"] = "{{ .Values.clientConfig.serverIP }}";
-    var siteCode = "{{ .Values.clientConfig.siteCode }}";
+    commonConfig["serverIP"] = "http://dev-h3-games.ninjagaming.com/sugarbox/api";
+    var siteCode = "SCNCSSC";
 
     var networkCode = "";
     var isGermanUI = false;
@@ -22,6 +21,7 @@ data:
     if (getUrlVar('super_meter_enabled') == 1) {
       isGermanUI = true;
     }
+
 
     if (siteCode) networkCode = siteCode.slice(2, 5);
 
@@ -50,7 +50,7 @@ data:
     }
 
     commonConfig["lobbyURL"] = commonConfig["serverIP"] + "/games/lobby";
-    commonConfig["logsPath"] = "{{ .Values.clientConfig.logsPath }}";
+    commonConfig["logsPath"] = "http://dev-h3-backoffice.ninjagaming.com/history";
 
     commonConfig["noSwipeUp"] = false;
 

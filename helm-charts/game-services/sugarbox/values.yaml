@@ -211,6 +211,6 @@ gameConfig:
 
 # Client configuration (addon.js)
 clientConfig:
-  serverIP: "https://dev-h3-games.ninjagaming.com/sugarbox/api"
+  serverIP: "http://dev-h3-games.ninjagaming.com/sugarbox/api"
   siteCode: "SCNCSSC"
-  logsPath: "https://dev-h3-backoffice.ninjagaming.com/history"
+  logsPath: "http://dev-h3-backoffice.ninjagaming.com/history"
