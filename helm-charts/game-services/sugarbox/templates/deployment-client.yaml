@@ -26,6 +26,8 @@ spec:
       - name: client
         image: "{{ .Values.client.image.registry }}/{{ .Values.client.image.repository }}:{{ .Values.client.image.tag }}"
         imagePullPolicy: {{ .Values.client.image.pullPolicy }}
+        command: ["/bin/sh", "-c"]
+        args: ["nginx -g 'daemon off;'"]
         ports:
         - name: http
           containerPort: {{ .Values.client.port }}
