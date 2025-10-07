@@ -21,6 +21,7 @@ podAnnotations:
   sidecar.istio.io/inject: "true"
   prometheus.io/scrape: "true"
   prometheus.io/port: "7210"
+  traffic.sidecar.istio.io/excludeOutboundIPRanges: "77.93.172.0/24"
 
 podLabels: {}
 
