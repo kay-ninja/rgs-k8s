@@ -1,0 +1,62 @@
+---
+# Istio Mesh Configuration with Tracing Enabled
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: istio
+  namespace: istio-system
+data:
+  mesh: |
+    defaultConfig:
+      tracing:
+        sampling: 100.0
+        zipkin:
+          address: tempo-distributor.monitoring.svc.cluster.local:9411
+    extensionProviders:
+    - name: zipkin
+      zipkin:
+        service: tempo-distributor.monitoring.svc.cluster.local
+        port: 9411
+    outboundTrafficPolicy:
+      mode: ALLOW_ANY
+    accessLogFile: /dev/stdout
+  meshNetworks: 'networks: {}'
+
+---
+# Telemetry resource for istio-system (ingress gateway)
+apiVersion: telemetry.istio.io/v1alpha1
+kind: Telemetry
+metadata:
+  name: tracing
+  namespace: istio-system
+spec:
+  tracing:
+  - providers:
+    - name: zipkin
+    randomSamplingPercentage: 100.0
+
+---
+# Telemetry resource for rgs-core namespace
+apiVersion: telemetry.istio.io/v1alpha1
+kind: Telemetry
+metadata:
+  name: tracing
+  namespace: rgs-core
+spec:
+  tracing:
+  - providers:
+    - name: zipkin
+    randomSamplingPercentage: 100.0
+
+---
+# Telemetry resource for rgs-games namespace
+apiVersion: telemetry.istio.io/v1alpha1
+kind: Telemetry
+metadata:
+  name: tracing
+  namespace: rgs-games
+spec:
+  tracing:
+  - providers:
+    - name: zipkin
+    randomSamplingPercentage: 100.0
