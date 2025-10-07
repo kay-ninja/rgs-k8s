@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-client
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ .Release.Name }}
+    component: client
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}
+      component: client
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}
+        component: client
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+      - name: client
+        image: "{{ .Values.client.image.registry }}/{{ .Values.client.image.repository }}:{{ .Values.client.image.tag }}"
+        imagePullPolicy: {{ .Values.client.image.pullPolicy }}
+        ports:
+        - name: http
+          containerPort: {{ .Values.client.port }}
+          protocol: TCP
+        volumeMounts:
+        - name: client-config
+          mountPath: /usr/src/app/games/common/src/addon.js
+          subPath: addon.js
+          readOnly: true
+        resources:
+          {{- toYaml .Values.resources.client | nindent 10 }}
+        livenessProbe:
+          httpGet:
+            path: /
+            port: http
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          timeoutSeconds: 3
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /
+            port: http
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3
+      volumes:
+      - name: client-config
+        configMap:
+          name: {{ .Release.Name }}-client-config

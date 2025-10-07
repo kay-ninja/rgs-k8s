@@ -1,0 +1,35 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-server-config
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ .Release.Name }}
+data:
+  config.yaml: |
+    http:
+      host: {{ .Values.config.http.host }}
+      port: {{ .Values.config.http.port }}
+      readTimeout: {{ .Values.config.http.readTimeout }}
+      writeTimeout: {{ .Values.config.http.writeTimeout }}
+      maxProcessingTime: {{ .Values.config.http.maxProcessingTime }}
+
+    overlord:
+      host: {{ .Values.config.overlord.host }}
+      port: {{ .Values.config.overlord.port }}
+      isSecure: {{ .Values.config.overlord.isSecure }}
+
+    history:
+      host: {{ .Values.config.history.host }}
+      port: {{ .Values.config.history.port }}
+      isSecure: {{ .Values.config.history.isSecure }}
+
+    rng:
+      client: {{ .Values.config.rng.client }}
+      host: {{ .Values.config.rng.host }}
+      port: {{ .Values.config.rng.port }}
+      isSecure: {{ .Values.config.rng.isSecure }}
+      maxProcessingTime: {{ .Values.config.rng.maxProcessingTime }}
+
+  dede5000.yaml: |
+{{ .Values.gameConfig | toYaml | indent 4 }}
