@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.client.name }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: cat-mansion
+    component: client
+spec:
+  replicas: {{ .Values.client.replicaCount }}
+  selector:
+    matchLabels:
+      app: cat-mansion
+      component: client
+  template:
+    metadata:
+      labels:
+        app: cat-mansion
+        component: client
+    spec:
+      imagePullSecrets:
+      {{- range .Values.imagePullSecrets }}
+        - name: {{ .name }}
+      {{- end }}
+      containers:
+      - name: client
+        image: "{{ .Values.client.image.repository }}:{{ .Values.client.image.tag }}"
+        imagePullPolicy: {{ .Values.client.image.pullPolicy }}
+        ports:
+        - containerPort: {{ .Values.client.port }}
+          name: http
+          protocol: TCP
+        {{- if .Values.client.livenessProbe.enabled }}
+        livenessProbe:
+          httpGet:
+            path: {{ .Values.client.livenessProbe.httpGet.path }}
+            port: {{ .Values.client.livenessProbe.httpGet.port }}
+          initialDelaySeconds: {{ .Values.client.livenessProbe.initialDelaySeconds }}
+          periodSeconds: {{ .Values.client.livenessProbe.periodSeconds }}
+          timeoutSeconds: {{ .Values.client.livenessProbe.timeoutSeconds }}
+          failureThreshold: {{ .Values.client.livenessProbe.failureThreshold }}
+        {{- end }}
+        {{- if .Values.client.readinessProbe.enabled }}
+        readinessProbe:
+          httpGet:
+            path: {{ .Values.client.readinessProbe.httpGet.path }}
+            port: {{ .Values.client.readinessProbe.httpGet.port }}
+          initialDelaySeconds: {{ .Values.client.readinessProbe.initialDelaySeconds }}
+          periodSeconds: {{ .Values.client.readinessProbe.periodSeconds }}
+          timeoutSeconds: {{ .Values.client.readinessProbe.timeoutSeconds }}
+          failureThreshold: {{ .Values.client.readinessProbe.failureThreshold }}
+        {{- end }}
+        resources:
+          limits:
+            cpu: {{ .Values.client.resources.limits.cpu }}
+            memory: {{ .Values.client.resources.limits.memory }}
+          requests:
+            cpu: {{ .Values.client.resources.requests.cpu }}
+            memory: {{ .Values.client.resources.requests.memory }}

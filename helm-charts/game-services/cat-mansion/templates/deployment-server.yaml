@@ -1,0 +1,67 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.server.name }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: cat-mansion
+    component: server
+spec:
+  replicas: {{ .Values.server.replicaCount }}
+  selector:
+    matchLabels:
+      app: cat-mansion
+      component: server
+  template:
+    metadata:
+      labels:
+        app: cat-mansion
+        component: server
+    spec:
+      imagePullSecrets:
+      {{- range .Values.imagePullSecrets }}
+        - name: {{ .name }}
+      {{- end }}
+      containers:
+      - name: server
+        image: "{{ .Values.server.image.repository }}:{{ .Values.server.image.tag }}"
+        imagePullPolicy: {{ .Values.server.image.pullPolicy }}
+        ports:
+        - containerPort: {{ .Values.server.port }}
+          name: http
+          protocol: TCP
+        {{- if .Values.server.livenessProbe.enabled }}
+        livenessProbe:
+          httpGet:
+            path: {{ .Values.server.livenessProbe.httpGet.path }}
+            port: {{ .Values.server.livenessProbe.httpGet.port }}
+          initialDelaySeconds: {{ .Values.server.livenessProbe.initialDelaySeconds }}
+          periodSeconds: {{ .Values.server.livenessProbe.periodSeconds }}
+          timeoutSeconds: {{ .Values.server.livenessProbe.timeoutSeconds }}
+          failureThreshold: {{ .Values.server.livenessProbe.failureThreshold }}
+        {{- end }}
+        {{- if .Values.server.readinessProbe.enabled }}
+        readinessProbe:
+          httpGet:
+            path: {{ .Values.server.readinessProbe.httpGet.path }}
+            port: {{ .Values.server.readinessProbe.httpGet.port }}
+          initialDelaySeconds: {{ .Values.server.readinessProbe.initialDelaySeconds }}
+          periodSeconds: {{ .Values.server.readinessProbe.periodSeconds }}
+          timeoutSeconds: {{ .Values.server.readinessProbe.timeoutSeconds }}
+          failureThreshold: {{ .Values.server.readinessProbe.failureThreshold }}
+        {{- end }}
+        resources:
+          limits:
+            cpu: {{ .Values.server.resources.limits.cpu }}
+            memory: {{ .Values.server.resources.limits.memory }}
+          requests:
+            cpu: {{ .Values.server.resources.requests.cpu }}
+            memory: {{ .Values.server.resources.requests.memory }}
+        volumeMounts:
+        - name: config
+          mountPath: /app/config.yaml
+          subPath: config.yaml
+      volumes:
+      - name: config
+        configMap:
+          name: {{ .Values.server.name }}-config

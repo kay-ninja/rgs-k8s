@@ -1,0 +1,13 @@
+apiVersion: v2
+name: cat-mansion
+description: Cat Mansion slot game - Custom server with WebSocket support
+type: application
+version: 1.0.0
+appVersion: "1.0.109"
+keywords:
+  - game
+  - slot
+  - websocket
+  - cat-mansion
+maintainers:
+  - name: RGS Team

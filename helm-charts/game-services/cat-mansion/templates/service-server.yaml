@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.server.name }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: cat-mansion
+    component: server
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+  - port: {{ .Values.service.server.port }}
+    targetPort: {{ .Values.service.server.targetPort }}
+    protocol: TCP
+    name: http
+  selector:
+    app: cat-mansion
+    component: server

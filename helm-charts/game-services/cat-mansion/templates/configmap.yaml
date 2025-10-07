@@ -1,0 +1,61 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.server.name }}-config
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: cat-mansion
+    component: server
+data:
+  config.yaml: |
+    engine:
+      rtp: {{ .Values.config.engine.rtp }}
+      buildVersion: {{ .Values.config.engine.buildVersion }}
+      volatility: {{ .Values.config.engine.volatility }}
+      debug: {{ .Values.config.engine.debug }}
+      isCheatsAvailable: {{ .Values.config.engine.isCheatsAvailable }}
+
+    server:
+      host: {{ .Values.config.server.host }}
+      port: {{ .Values.config.server.port }}
+      readTimeout: {{ .Values.config.server.readTimeout }}
+      writeTimeout: {{ .Values.config.server.writeTimeout }}
+      maxProcessingTime: {{ .Values.config.server.maxProcessingTime }}
+
+    websocket:
+      maxProcessingTime: {{ .Values.config.websocket.maxProcessingTime }}
+      readBufferSize: {{ .Values.config.websocket.readBufferSize }}
+      writeBufferSize: {{ .Values.config.websocket.writeBufferSize }}
+
+    overlord:
+      host: {{ .Values.config.overlord.host }}
+      port: {{ .Values.config.overlord.port }}
+      isSecure: {{ .Values.config.overlord.isSecure }}
+
+    history:
+      host: {{ .Values.config.history.host }}
+      port: {{ .Values.config.history.port }}
+      isSecure: {{ .Values.config.history.isSecure }}
+
+    rng:
+      host: {{ .Values.config.rng.host }}
+      port: {{ .Values.config.rng.port }}
+      maxProcessingTime: {{ .Values.config.rng.maxProcessingTime }}
+
+    tracer:
+      disabled: {{ .Values.config.tracer.disabled }}
+      url: {{ .Values.config.tracer.url }}
+      serviceName: {{ .Values.config.tracer.serviceName }}
+
+    game:
+      availableGames:
+      {{- range .Values.config.game.availableGames }}
+        - {{ . }}
+      {{- end }}
+      availableIntegrators:
+      {{- range .Values.config.game.availableIntegrators }}
+        - {{ . }}
+      {{- end }}
+
+    logger:
+      logLevel: {{ .Values.config.logger.logLevel }}

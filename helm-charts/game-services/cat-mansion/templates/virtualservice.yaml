@@ -1,0 +1,38 @@
+{{- if .Values.virtualService.enabled }}
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: cat-mansion
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: cat-mansion
+spec:
+  hosts:
+  - {{ .Values.virtualService.host }}
+  gateways:
+  - {{ .Values.virtualService.gateway }}
+  http:
+  # Client routes (static files)
+  - match:
+    - uri:
+        prefix: {{ .Values.virtualService.prefix }}/
+    - uri:
+        prefix: {{ .Values.virtualService.prefix }}
+    route:
+    - destination:
+        host: {{ .Values.client.name }}.{{ .Values.namespace }}.svc.cluster.local
+        port:
+          number: {{ .Values.service.client.port }}
+  
+  # Server API routes
+  - match:
+    - uri:
+        prefix: {{ .Values.virtualService.prefix }}/api/
+    rewrite:
+      uri: /
+    route:
+    - destination:
+        host: {{ .Values.server.name }}.{{ .Values.namespace }}.svc.cluster.local
+        port:
+          number: {{ .Values.service.server.port }}
+{{- end }}

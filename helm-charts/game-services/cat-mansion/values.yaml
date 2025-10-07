@@ -1,0 +1,158 @@
+# Cat-Mansion Helm Chart Values
+# Pattern: Custom Server with WebSocket (Aviatron-style)
+
+# Global settings
+namespace: rgs-games
+imagePullSecrets:
+  - name: docker-registry-credentials
+
+# Server configuration
+server:
+  name: cat-mansion-server
+  replicaCount: 2
+  image:
+    repository: registry.ejaw.net/rgs/backend/slots/ninjagaming/dog-house-megaways
+    tag: "3.0.2"
+    pullPolicy: IfNotPresent
+  port: 8000
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 200m
+      memory: 256Mi
+  livenessProbe:
+    enabled: true
+    httpGet:
+      path: /health
+      port: 8000
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+  readinessProbe:
+    enabled: true
+    httpGet:
+      path: /health
+      port: 8000
+    initialDelaySeconds: 10
+    periodSeconds: 5
+    timeoutSeconds: 3
+    failureThreshold: 3
+
+# Client configuration
+client:
+  name: cat-mansion-client
+  replicaCount: 2
+  image:
+    repository: registry.ejaw.net/rgs/frontend/slots/ninjagaming/cat-mansion
+    tag: "1.0.109"
+    pullPolicy: IfNotPresent
+  # ⚠️ WARNING: VERIFY THIS PORT BEFORE DEPLOYING!
+  # Run: docker run --rm registry.ejaw.net/rgs/frontend/slots/ninjagaming/cat-mansion:1.0.109 sh -c "sleep 5 && ss -tulpn"
+  # Common values: 80 (default) or 8089 (some clients)
+  port: 80
+  resources:
+    limits:
+      cpu: 200m
+      memory: 256Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+  livenessProbe:
+    enabled: true
+    httpGet:
+      path: /
+      port: 80
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+  readinessProbe:
+    enabled: true
+    httpGet:
+      path: /
+      port: 80
+    initialDelaySeconds: 10
+    periodSeconds: 5
+    timeoutSeconds: 3
+    failureThreshold: 3
+
+# Service configuration
+service:
+  type: ClusterIP
+  server:
+    port: 8000
+    targetPort: 8000
+  client:
+    port: 80
+    targetPort: 80
+
+# Ingress/VirtualService configuration
+virtualService:
+  enabled: true
+  gateway: istio-system/default-gateway
+  host: dev-h3-games.ninjagaming.com
+  port: 30828
+  prefix: /cat-mansion
+
+# Game engine configuration
+config:
+  engine:
+    rtp: 94
+    buildVersion: 1
+    volatility: medium
+    debug: true
+    isCheatsAvailable: true
+
+  server:
+    host: 0.0.0.0
+    port: 8000
+    readTimeout: 30s
+    writeTimeout: 30s
+    maxProcessingTime: 60000
+
+  websocket:
+    maxProcessingTime: 30000ms
+    readBufferSize: 1024
+    writeBufferSize: 1024
+
+  # Service endpoints - Updated for Kubernetes
+  overlord:
+    host: overlord-service.rgs-core.svc.cluster.local
+    port: 7500
+    isSecure: false
+
+  history:
+    host: history-service.rgs-core.svc.cluster.local
+    port: 7200
+    isSecure: false
+
+  rng:
+    host: rng-service-grpc.rgs-core.svc.cluster.local
+    port: 7700
+    maxProcessingTime: 30000ms
+
+  tracer:
+    disabled: true
+    url: jaeger-jaeger-operator-jaeger-collector.observability.svc.cluster.local:14268/api/traces
+    serviceName: cat-mansion-server
+
+  game:
+    availableGames:
+      - cat-mansion
+    availableIntegrators:
+      - daintree
+      - mockdirect
+      - fixbet
+      - kralbet
+      - mariobet
+      - mock
+      - onwin
+      - tarafbet
+      - xax
+      - xslot
+
+  logger:
+    logLevel: error
