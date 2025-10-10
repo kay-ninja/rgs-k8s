@@ -82,9 +82,9 @@ config:
     isSecure: false
 
   launch:
-    baseURL: "https://dev-h3-games.ninjagaming.com/"
-    bfBaseURL: "https://dev-h3-games.ninjagaming.com/"
-    gamehubBaseURL: "https://dev-h3-games.ninjagaming.com/"
+    baseURL: "https://xtechgaming.com/"
+    bfBaseURL: "https://xtechgaming.com/"
+    gamehubBaseURL: "https://xtechgaming.com/"
     format: "%v%v/?user_id=%v&integrator=%s&jurisdiction=UA&currency=%s&user_locale=%s"
 
   bf:
@@ -171,7 +171,7 @@ integrators:
 # Providers configuration
 providers:
   ninjagaming:
-    baseURL: "https://dev-h3-games.ninjagaming.com/"
+    baseURL: "https://xtechgaming.com/"
 
 # Health checks
 livenessProbe:

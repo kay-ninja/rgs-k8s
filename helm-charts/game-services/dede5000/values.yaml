@@ -212,6 +212,6 @@ gameConfig:
 
 # Client configuration (addon.js)
 clientConfig:
-  serverIP: "https://dev-h3-games.ninjagaming.com/cyprus-dede5000/api"
+  serverIP: "https://xtechgaming.com/cyprus-dede5000/api"
   siteCode: "SCNCSSC"
-  logsPath: "https://dev-h3-backoffice.ninjagaming.com/history"
+  logsPath: "https://xtechgaming.com/history"

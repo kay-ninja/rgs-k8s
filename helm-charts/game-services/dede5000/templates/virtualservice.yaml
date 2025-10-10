@@ -8,6 +8,7 @@ metadata:
 spec:
   hosts:
   - "dev-h3-games.ninjagaming.com"
+  - "xtechgaming.com"
   gateways:
   - istio-system/rgs-gateway
   http:

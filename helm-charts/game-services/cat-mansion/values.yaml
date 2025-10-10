@@ -93,7 +93,7 @@ service:
 virtualService:
   enabled: true
   gateway: istio-system/default-gateway
-  host: dev-h3-games.ninjagaming.com
+  host: xtechgaming.com
   port: 30828
   prefix: /cat-mansion
 

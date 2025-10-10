@@ -8,7 +8,7 @@ metadata:
 data:
   addon.js: |
     var gameEnginePath = gameEnginePath ? gameEnginePath : "/";
-    commonConfig["serverIP"] = "http://dev-h3-games.ninjagaming.com/sugarbox/api";
+    commonConfig["serverIP"] = "https://xtechgaming.com/sugarbox/api";
     var siteCode = "SCNCSSC";
 
     var networkCode = "";
